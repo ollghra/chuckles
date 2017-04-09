@@ -7,9 +7,11 @@
 extern "C" {
 #endif
 
-__attribute__((__noreturn__))
-void abort(void);
+  __attribute__((__noreturn__))
+  void abort(void);
 
+  char *itoa( int i );
+  
 #ifdef __cplusplus
 }
 #endif
