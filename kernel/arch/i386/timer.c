@@ -23,7 +23,8 @@ void timer_handler(struct regs *r)
     {
       seconds++;
       serial_writed(seconds);
-      serial_writes(" s passed\n");
+      serial_writes("s passed\n");
+      printf("%ds passed", seconds);
     }
 }
  
