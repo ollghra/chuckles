@@ -407,27 +407,24 @@ irq15:
 
 irq_common_stub:
     pusha
-    pushw %ds
-    pushw %es
-    pushw %fs
-    pushw %gs
-
-    movw $0x10, %ax
-    movw %ax, %ds
-    movw %ax, %es
-    movw %ax, %fs
-    movw %ax, %gs
-    movw %esp, %eax
-
-    pushl %eax
-    //movw irq_handler, %eax
+    push %ds
+    push %es
+    push %fs
+    push %gs
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %esp, %eax
+    push %eax
+    mov irq_handler, %eax
     call irq_handler
-    popl %eax
-
-    popw %gs
-    popw %fs
-    popw %es
-    popw %ds
+    pop %eax
+    pop %gs
+    pop %fs
+    pop %es
+    pop %ds
     popa
     add $8, %esp
     iret

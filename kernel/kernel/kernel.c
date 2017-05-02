@@ -22,8 +22,7 @@ void serial_initialise()
   outb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
   outb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
   outb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
-  //outb(PORT + 4, 0);
-  
+  //outb(PORT + 4, 0); 
 }
 
 void kernel_main(void) {  
@@ -35,12 +34,11 @@ void kernel_main(void) {
   idt_init();
   isrs_install();
   irq_install();
- 
-  //timer_install();
-  __asm__ __volatile__ ("sti");
-  printf("%d", 1/0);
+
+  timer_install();
+ __asm__ __volatile__ ("sti");  
+  //printf("%d", 1/0);
   printf("Well, Chuckles\nChuckle away\n");
-  //timer_wait(5);
-  printf("Timer Finished");
+  timer_wait(5);printf("Timer Finished");
   //init_paging();
 }

@@ -81,7 +81,8 @@ void isrs_install()
   printf("ISRINSTALL\n");
 }
 
-const char *exception_messages[] =
+//const
+char *exception_messages[] =
   {
     "Division By Zero",
     "Debug",
@@ -119,13 +120,10 @@ const char *exception_messages[] =
     "Reserved",
     "Reserved"
   };
+/**
+   All ISRs point here
+ */
 
-/* All of our Exception handling Interrupt Service Routines will
- *  point to this function. This will tell us what exception has
- *  happened! Right now, we simply halt the system by hitting an
- *  endless loop. All ISRs disable interrupts while they are being
- *  serviced as a 'locking' mechanism to prevent an IRQ from
- *  happening and messing up kernel data structures */
 void fault_handler(struct regs *r)
 {
   serial_writes("ISR fault_handler\n");
@@ -134,6 +132,8 @@ void fault_handler(struct regs *r)
   if (r->int_no < 32)
     {
       printf("\n%s Exception. System Halted\n", exception_messages[r->int_no]);
+      serial_writes(exception_messages[r->int_no]);
+      serial_writes(" Exception. System Halted\n");
       for (;;);
     }
   else

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 
 #include <arch/i386/irq.h>
 #include <arch/i386/timer.h>
@@ -7,7 +8,7 @@
 #include <sys/io.h>
 #include <sys/debug.h>
 
-volatile unsigned int timer_ticks = 0;
+uint32_t timer_ticks = 0;
 int seconds = 0;
 
 /* Handles the timer. By default, the timer fires 18.222 times
@@ -15,26 +16,33 @@ int seconds = 0;
 void timer_handler(struct regs *r)
 {  
   timer_ticks++;
-  
+  serial_writes("Timer Handler ");
+  serial_writed(timer_ticks);
+  serial_writec('\n');
   if (timer_ticks % 100 == 0)
     {
       seconds++;
       serial_writed(seconds);
-      printf("SECOND PASSED");
+      serial_writes(" s passed\n");
     }
 }
  
 void timer_wait(int ticks)
 {
-  volatile unsigned int eticks;
+  volatile uint32_t eticks;
   
   eticks = timer_ticks + ticks;
-  printf("%d", timer_ticks);
+  int n = 0;
   while(timer_ticks < eticks) 
     {
-      serial_writes("Timer waiting");
-      for(;;);
-      __asm__ __volatile__ ("sti//hlt//cli");
+      serial_writed(n++);
+      serial_writes(": Timer waiting. timer_ticks: ");
+      serial_writed(timer_ticks);
+      serial_writes(" | eticks: ");
+      serial_writed(eticks);
+      serial_writes("\n");
+      //      printf("Timer waiting. timer_ticks: %d, eticks: %d\n", timer_ticks++, eticks);
+       __asm__ __volatile__ ("hlt");
     }
 }
  
@@ -50,7 +58,6 @@ void timer_install()
 {
   serial_writes("Timer Install\n");
   timer_phase(100);
-  serial_writes("timer_phase 100\n");
   irq_install_handler(0, timer_handler);
   serial_writes("timer handler installed\n");
 }
