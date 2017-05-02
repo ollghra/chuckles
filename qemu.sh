@@ -2,5 +2,5 @@
 set -e
 . ./iso.sh
 
-#~/src/cpulimit/src/cpulimit -l 10 qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom chuckles.iso
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom chuckles.iso
+#cpulimit -l 10 -- qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom chuckles.iso -monitor stdio -serial file:serial.log -d int
+qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom chuckles.iso -monitor stdio -serial file:serial.log -singlestep

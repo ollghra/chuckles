@@ -1,7 +1,10 @@
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <arch/i386/idt.h>
+
+#include <sys/debug.h>
 
 struct IDT_Gate {
   uint16_t offset_lo;
@@ -35,10 +38,13 @@ void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags)
 void idt_init()
 {
   IDTp.limit = (sizeof (struct IDT_Gate) * 256) - 1;
-  IDTp.base = (uint32_t) &IDT;
-
+  IDTp.base = (uint32_t) &(IDT[0]);
+  printf("&IDT: %d\n", (uint32_t) &(IDT[0]));
   memset(&IDT, 0, sizeof (struct IDT_Gate) * 256);
 
-
+  serial_writes("&IDT: ");
+  serial_writed((uint32_t) &IDT[0]);
+  serial_writec('\n');
+  
   IDT_load();
 }

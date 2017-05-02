@@ -1,7 +1,7 @@
 #ifndef _SYS_IO_H
 #define _SYS_IO_H 1
 
-static __inline unsigned char
+static inline unsigned char
 inb (unsigned short int port)
 {
   unsigned char _v;
@@ -9,7 +9,7 @@ inb (unsigned short int port)
   return _v;
 }
 
-static __inline unsigned short int
+static inline unsigned short int
 inw (unsigned short int port)
 {
   unsigned short _v;
@@ -17,7 +17,7 @@ inw (unsigned short int port)
   return _v;
 }
 
-static __inline unsigned int
+static inline unsigned int
 inl (unsigned short int port)
 {
   unsigned int _v;
@@ -25,20 +25,20 @@ inl (unsigned short int port)
   return _v;
 }
 
-static __inline void
-outb (unsigned char value, unsigned short int port)
+static inline void
+outb (unsigned short int port, unsigned char value)
 {
   __asm__ __volatile__ ("outb %b0,%w1": :"a" (value), "Nd" (port));
 }
 
-static __inline void
-outw (unsigned short int value, unsigned short int port)
+static inline void
+outw (unsigned short int port, unsigned short int value)
 {
   __asm__ __volatile__ ("outw %w0,%w1": :"a" (value), "Nd" (port));
 }
 
-static __inline void
-outl (unsigned int value, unsigned short int port)
+static inline void
+outl (unsigned short int port, unsigned int value)
 {
   __asm__ __volatile__ ("outl %0,%w1": :"a" (value), "Nd" (port));
 }
