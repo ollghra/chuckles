@@ -67,7 +67,39 @@ int printf(const char* restrict format, ...) {
       int d = va_arg(parameters, int);
       if (!print(itoa(d), strlen(itoa(d))))
 	return -1;
-      written++;
+      written += strlen(itoa(d));
+    } else if (*format == 'x') {
+      format++;
+#define INT_DIGITS 16
+      char buf[INT_DIGITS + 2 /* 0x */ + 1 /* \0 */];
+      int x = va_arg(parameters, int);
+      int i = 0;
+      char hex[16] = {'0','1','2','3','4','5','6','7'
+		      ,'8','9','A','B','C','D','E','F'};
+      //      buf[0] = 0;
+      if(x > 0)
+	{
+	  for(i = 0; x > 0; x /= 0x10, i++)
+	    {
+	      buf[i] = hex[x%16];
+	    }
+	}
+      else if ( x < 0 )
+	{
+	  print("NEG", 3);
+	}
+      else if ( x == 0 )
+	{
+	  buf[0] = '0';
+	  i = 1;
+	}
+      buf[i++] = 'x';
+      buf[i++] = '0';
+      buf[i] = 0;
+      strrev(buf);
+      if(!print(buf, i))
+	return -1;
+      written += i;
     }
     else {
       format = format_begun_at;

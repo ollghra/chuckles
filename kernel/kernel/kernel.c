@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include <kernel/tty.h>
 
@@ -37,10 +38,16 @@ extern unsigned long kernel_end_marker;
 extern unsigned long kernel_start_marker;
 void kernel_end()
 {
-  printf("kernel start = %d\n", &kernel_start_marker); 
-  printf("kernel end   = %d\n",  kernel_end_marker);
-  printf("kernel ends at %d\n", &kernel_end_marker);
-  printf("kernel size: B = %d\tkB = %d", &kernel_end_marker - &kernel_start_marker, (&kernel_end_marker - &kernel_start_marker)/1024);
+  printf("kernel start = %x\n", &kernel_start_marker); 
+  printf("kernel end Magic! = %x\n",  kernel_end_marker);
+  printf("kernel end   = %x\n", &kernel_end_marker);
+  printf("kernel size  = %d B, %d kB\n", &kernel_end_marker - &kernel_start_marker, (&kernel_end_marker - &kernel_start_marker)/1024);
+  char a[] = {'P','o','o',0};
+  char *b = "Big\0";
+
+  printf("a = %s, b = %s\n", a, b);
+  printf("strcpy(b,a) : %s, a = %s, b = %s\n", strcpy(b, a), a, b);
+  serial_writes(b);
 }
 /*
  * Old tests:
