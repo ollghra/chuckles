@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <sys/debug.h>
+
 static bool print(const char* data, size_t length) {
   const unsigned char* bytes = (const unsigned char*) data;
   for (size_t i = 0; i < length; i++)
@@ -86,7 +88,11 @@ int printf(const char* restrict format, ...) {
 	}
       else if ( x < 0 )
 	{
-	  print("NEG", 3);
+	  //print("NEG", 3);
+	  for(i = 0, x++; x < 0; x /= 0x10, i++)
+	    {
+	      buf[i] = hex[(x % 0x10) + 15];
+	    }
 	}
       else if ( x == 0 )
 	{
