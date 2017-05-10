@@ -24,10 +24,13 @@ void timer_handler(struct regs *r)
       seconds++;
       serial_writed(seconds);
       serial_writes("s passed\n");
-      printf("%ds passed", seconds);
+      //      printf("%ds passed\n", seconds);
     }
 }
- 
+
+/**
+   Waits for (ticks * 10) ms
+*/
 void timer_wait(int ticks)
 {
   volatile uint32_t eticks;

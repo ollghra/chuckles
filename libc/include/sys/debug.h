@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include <sys/io.h>
+void serial_initialise(void);
 
 static inline void
 serial_writec(char c)

@@ -110,9 +110,9 @@ void irq_handler(struct regs *r)
       serial_writes("INT NO > 16: ");
       serial_writed(r->int_no);
       serial_writes("\n");
-      if(r->int_no == 32)
+      if(r->int_no == 33)
 	{
-	  serial_writes("TIMER");
+	  serial_writes("Keyboard");
 	}
       return;
     }

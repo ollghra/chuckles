@@ -78,7 +78,6 @@ void isrs_install()
   idt_set_gate(29, (unsigned)isr29, 0x08, 0x8E);
   idt_set_gate(30, (unsigned)isr30, 0x08, 0x8E);
   idt_set_gate(31, (unsigned)isr31, 0x08, 0x8E);
-  printf("ISRINSTALL\n");
 }
 
 //const
@@ -123,17 +122,21 @@ char *exception_messages[] =
 /**
    All ISRs point here
  */
-
+void page_fault(struct regs *r);
 void fault_handler(struct regs *r)
 {
   serial_writes("ISR fault_handler\n");
-  //serial_writed(r->int_no);
-  //serial_writes("\n");
   if (r->int_no < 32)
     {
-      printf("\n%s Exception. System Halted\n", exception_messages[r->int_no]);
-      serial_writes(exception_messages[r->int_no]);
-      serial_writes(" Exception. System Halted\n");
+      switch(r->int_no)
+	{
+	case 14:
+	  page_fault(r);
+	default:
+	  printf("\n%s Exception. System Halted\n", exception_messages[r->int_no]);
+	  serial_writes(exception_messages[r->int_no]);
+	  serial_writes(" Exception. System Halted\n");
+	}
       for (;;);
     }
   else
@@ -142,4 +145,30 @@ void fault_handler(struct regs *r)
       serial_writed(r->int_no);
       for(;;);
     }
+}
+
+void page_fault(struct regs *r)
+{
+   // A page fault has occurred.
+   // The faulting address is stored in the CR2 register.
+   uint32_t faulting_address;
+   asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
+
+   // The error code gives us details of what happened.
+   int present   = !(r->err_code & 0x1); // Page not present
+   int rw = r->err_code & 0x2;           // Write operation?
+   int us = r->err_code & 0x4;           // Processor was in user-mode?
+   int reserved = r->err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
+   int id = r->err_code & 0x10;          // Caused by an instruction fetch?
+
+   // Output an error message.
+   serial_writes("Page fault! ( ");
+   if (present) {serial_writes("present ");}
+   if (rw) {serial_writes("read-only ");}
+   if (us) {serial_writes("user-mode ");}
+   if (reserved) {serial_writes("reserved ");}
+   serial_writes(") at 0x");
+   serial_writed(faulting_address);
+   serial_writes("\n");
+   for(;;);
 }
