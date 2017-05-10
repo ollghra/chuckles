@@ -3,7 +3,7 @@
 #include <sys/io.h>
 #include <sys/debug.h>
 
-void serial_initialise()
+void serial_initialise(void)
 {
 #define PORT 0x3f8    // COM1
   outb(PORT + 1, 0x00);    // Disable all interrupts
@@ -13,6 +13,5 @@ void serial_initialise()
   outb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
   outb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
   outb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
-  //outb(PORT + 4, 0); 
+  outb(PORT + 4, 0); 
 }
-
