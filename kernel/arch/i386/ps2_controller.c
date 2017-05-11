@@ -165,6 +165,6 @@ void ps2_init(void)
       break;
     }
   ps2_write(1, 0xF4);
-  printf("ACK? %x\n", ps2_read());
+  printf("Scanning enabled %s\n", ps2_read() == 0xFA ? "Yes": "Error");
 }
 

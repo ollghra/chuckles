@@ -29,10 +29,8 @@ void kernel_early(void)
   isrs_install();
   irq_install();
   timer_install();
-  
   ps2_init();
   ps2kb_init();
-  
   __asm__ __volatile__ ("sti");
 }
 
@@ -40,7 +38,6 @@ void kernel_main(void) {
   kernel_early();
   printf("Well, Chuckles\nChuckle away\n");
   current_test();
-  
   kernel_end();
 }
 
