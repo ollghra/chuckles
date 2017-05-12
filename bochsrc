@@ -1,0 +1,12 @@
+romimage: file=$BXSHARE/BIOS-bochs-latest
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+ata0-slave: type=cdrom, path="chuckles.iso", status=inserted
+
+boot: cdrom
+
+cpu: count=1, ips=1000000
+megs: 128
+
+log: bochsout.txt
