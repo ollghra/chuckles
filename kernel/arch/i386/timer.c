@@ -16,15 +16,9 @@ int seconds = 0;
 void timer_handler(struct regs *r)
 {  
   timer_ticks++;
-  serial_writes("Timer Handler ");
-  serial_writed(timer_ticks);
-  serial_writec('\n');
   if (timer_ticks % 100 == 0)
     {
       seconds++;
-      serial_writed(seconds);
-      serial_writes("s passed\n");
-      //      printf("%ds passed\n", seconds);
     }
 }
 

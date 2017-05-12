@@ -7,6 +7,8 @@
 
 #include <sys/io.h>
 #include <sys/debug.h>
+#include <sys/kb.h>
+#include <sys/shell.h>
 
 #define LCTL 0x10
 #define LSHF 0x11
@@ -23,12 +25,6 @@ struct {
   bool lalt;
   bool ralt;
 } ps2kb_state;
-
-struct key_event {
-  uint8_t utf8;
-  bool down;
-  uint8_t flags; // LSB[special, control, shift, alt, 0,0,0,0MSB]
-};
 
 char *kb_map;
 
@@ -59,8 +55,7 @@ void ps2kb_handler(struct regs *r)
   scancode = ps2_read();
 
   struct key_event e;
-  e.flags = 1; // Set special bit by default
-  e.down = false;
+  e.flags = 0x1; // Set special bit by default
   bool state;
   if(scancode == 0xF0)
     {
@@ -121,27 +116,24 @@ void ps2kb_handler(struct regs *r)
       e.flags = 0 + // Special bit unset, i.e. character
 	(((int)(ps2kb_state.lctrl || ps2kb_state.rctrl)) << 1) +
 	(((int)(ps2kb_state.lshift || ps2kb_state.rshift)) << 2) +
-	(((int)(ps2kb_state.lalt || ps2kb_state.ralt )) << 3);
-      e.down = state;
+	(((int)(ps2kb_state.lalt || ps2kb_state.ralt )) << 3) +
+	((int)state << 7);
       break;
     }
   
-  if(!(e.flags & 1) && e.down)
-    printf("%c F:[%c,%c,%c]", e.utf8,
-	   (e.flags & (1<<1)) == (1<<1)? 'C':'0',
-	   (e.flags & (1<<2)) == (1<<2) ? 'S': '0',
-	   (e.flags & (1<<3)) == (1<<3) ? 'A': '0');
-
+  shell_key(e);
   // Fire key_event ==> >=3 }-->
+
+  //  shell_input_key_event(e);
   
   serial_writes("KB:");
   serial_writed(e.utf8);
   serial_writes("\n");
-  
 }
 
 void ps2kb_init(void)
 {
+  inb(0x60);
   irq_install_handler(1, ps2kb_handler);
 
   ps2kb_state.lshift = false;
@@ -150,9 +142,11 @@ void ps2kb_init(void)
   ps2kb_state.rctrl  = false;
   ps2kb_state.lalt   = false;
   ps2kb_state.ralt   = false;
-
+  
   kb_map = gb;
+  
   printf("Keyboard Installed\n");
   printf("WARNING! THIS REALLY DOESN't WORK");
   serial_writes("Keyboard install\n");
 }
+

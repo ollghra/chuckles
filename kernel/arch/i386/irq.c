@@ -103,17 +103,15 @@ void irq_install()
  *  an EOI, you won't raise any more IRQs */
 void irq_handler(struct regs *r)
 {
-  serial_writes("IRQ_HANDLER\n");
+  serial_writes("IRQ_HANDLER #");
+  serial_writed(r->int_no - 32);
+  serial_writes("\n");
 
   if(r->int_no - 32 > 16)
     {
       serial_writes("INT NO > 16: ");
       serial_writed(r->int_no);
       serial_writes("\n");
-      if(r->int_no == 33)
-	{
-	  serial_writes("Keyboard");
-	}
       return;
     }
   
