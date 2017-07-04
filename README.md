@@ -5,6 +5,7 @@
 |00| |00| |0  0|   \00/   |000  x  |00   |0  0|   0|0   0|0 |000 |0 \0  \00| |000  O |
 ````
 ## Design Considerations
+### [Error Codes](https://www.gnu.org/fun/jokes/errno.2.html)
 ### Code Structuring
 You should decide how your code should be structured. Consider that you will eventually port your operating system to different architectures, with different assembly instructions, with different initialisation sequences, with different hardware, with different memory structures, etc. You have to ensure you don't mix files from one architecture with files from another architecture. Meaty Skeleton serves as a minimal example of how to structure your code.
 ### Future Proofing
