@@ -17,6 +17,7 @@
 #include <sys/debug.h>
 #include <sys/kb.h>
 #include <sys/shell.h>
+#include <sys/multiboot.h>
 
 void kernel_end(void);
 void current_test(void);
@@ -36,8 +37,15 @@ void kernel_early(void)
   __asm__ __volatile__ ("sti");
 }
 
-void kernel_main(void) {
+void kernel_main(unsigned int ebx) {
   kernel_early();
+  
+  multiboot_info_t *mbinfo = (multiboot_info_t *) ebx;
+  unsigned int address_of_module = mbinfo->mods_addr;
+  printf("ebx: %x\nmodule address: %x\nflags: %x\nmods_count: %x\n", ebx, address_of_module, mbinfo->flags, mbinfo->mods_count);
+  typedef void (*call_module_t)(void);
+  call_module_t start_program = (call_module_t) address_of_module;
+  //start_program();
   printf("Well, Chuckles\nChuckle away\n");
   current_test();
   kernel_end();
