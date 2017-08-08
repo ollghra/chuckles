@@ -44,7 +44,7 @@ void terminal_putchar(char c) {
 	  {
 	  case '\n':
 	    terminal_column = 0;
-	    terminal_row++;
+	    terminal_row + 1 == VGA_HEIGHT ? terminal_row = 0: terminal_row++;
 	    break;
 	  default:
 	    terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
