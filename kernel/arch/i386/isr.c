@@ -41,134 +41,137 @@ extern void isr31();
 
 void isrs_install()
 {
-  serial_writes("ISRS Install\n");
-  
-  idt_set_gate(0, (unsigned)isr0, 0x08, 0x8E);
-  idt_set_gate(1, (unsigned)isr1, 0x08, 0x8E);
-  idt_set_gate(2, (unsigned)isr2, 0x08, 0x8E);
-  idt_set_gate(3, (unsigned)isr3, 0x08, 0x8E);
-  idt_set_gate(4, (unsigned)isr4, 0x08, 0x8E);
-  idt_set_gate(5, (unsigned)isr5, 0x08, 0x8E);
-  idt_set_gate(6, (unsigned)isr6, 0x08, 0x8E);
-  idt_set_gate(7, (unsigned)isr7, 0x08, 0x8E);
+	serial_writes("ISRS Install\n");
 
-  idt_set_gate(8, (unsigned)isr8, 0x08, 0x8E);
-  idt_set_gate(9, (unsigned)isr9, 0x08, 0x8E);
-  idt_set_gate(10, (unsigned)isr10, 0x08, 0x8E);
-  idt_set_gate(11, (unsigned)isr11, 0x08, 0x8E);
-  idt_set_gate(12, (unsigned)isr12, 0x08, 0x8E);
-  idt_set_gate(13, (unsigned)isr13, 0x08, 0x8E);
-  idt_set_gate(14, (unsigned)isr14, 0x08, 0x8E);
-  idt_set_gate(15, (unsigned)isr15, 0x08, 0x8E);
+	idt_set_gate(0, (unsigned)isr0, 0x08, 0x8E);
+	idt_set_gate(1, (unsigned)isr1, 0x08, 0x8E);
+	idt_set_gate(2, (unsigned)isr2, 0x08, 0x8E);
+	idt_set_gate(3, (unsigned)isr3, 0x08, 0x8E);
+	idt_set_gate(4, (unsigned)isr4, 0x08, 0x8E);
+	idt_set_gate(5, (unsigned)isr5, 0x08, 0x8E);
+	idt_set_gate(6, (unsigned)isr6, 0x08, 0x8E);
+	idt_set_gate(7, (unsigned)isr7, 0x08, 0x8E);
 
-  idt_set_gate(16, (unsigned)isr16, 0x08, 0x8E);
-  idt_set_gate(17, (unsigned)isr17, 0x08, 0x8E);
-  idt_set_gate(18, (unsigned)isr18, 0x08, 0x8E);
-  idt_set_gate(19, (unsigned)isr19, 0x08, 0x8E);
-  idt_set_gate(20, (unsigned)isr20, 0x08, 0x8E);
-  idt_set_gate(21, (unsigned)isr21, 0x08, 0x8E);
-  idt_set_gate(22, (unsigned)isr22, 0x08, 0x8E);
-  idt_set_gate(23, (unsigned)isr23, 0x08, 0x8E);
+	idt_set_gate(8, (unsigned)isr8, 0x08, 0x8E);
+	idt_set_gate(9, (unsigned)isr9, 0x08, 0x8E);
+	idt_set_gate(10, (unsigned)isr10, 0x08, 0x8E);
+	idt_set_gate(11, (unsigned)isr11, 0x08, 0x8E);
+	idt_set_gate(12, (unsigned)isr12, 0x08, 0x8E);
+	idt_set_gate(13, (unsigned)isr13, 0x08, 0x8E);
+	idt_set_gate(14, (unsigned)isr14, 0x08, 0x8E);
+	idt_set_gate(15, (unsigned)isr15, 0x08, 0x8E);
 
-  idt_set_gate(24, (unsigned)isr24, 0x08, 0x8E);
-  idt_set_gate(25, (unsigned)isr25, 0x08, 0x8E);
-  idt_set_gate(26, (unsigned)isr26, 0x08, 0x8E);
-  idt_set_gate(27, (unsigned)isr27, 0x08, 0x8E);
-  idt_set_gate(28, (unsigned)isr28, 0x08, 0x8E);
-  idt_set_gate(29, (unsigned)isr29, 0x08, 0x8E);
-  idt_set_gate(30, (unsigned)isr30, 0x08, 0x8E);
-  idt_set_gate(31, (unsigned)isr31, 0x08, 0x8E);
+	idt_set_gate(16, (unsigned)isr16, 0x08, 0x8E);
+	idt_set_gate(17, (unsigned)isr17, 0x08, 0x8E);
+	idt_set_gate(18, (unsigned)isr18, 0x08, 0x8E);
+	idt_set_gate(19, (unsigned)isr19, 0x08, 0x8E);
+	idt_set_gate(20, (unsigned)isr20, 0x08, 0x8E);
+	idt_set_gate(21, (unsigned)isr21, 0x08, 0x8E);
+	idt_set_gate(22, (unsigned)isr22, 0x08, 0x8E);
+	idt_set_gate(23, (unsigned)isr23, 0x08, 0x8E);
+
+	idt_set_gate(24, (unsigned)isr24, 0x08, 0x8E);
+	idt_set_gate(25, (unsigned)isr25, 0x08, 0x8E);
+	idt_set_gate(26, (unsigned)isr26, 0x08, 0x8E);
+	idt_set_gate(27, (unsigned)isr27, 0x08, 0x8E);
+	idt_set_gate(28, (unsigned)isr28, 0x08, 0x8E);
+	idt_set_gate(29, (unsigned)isr29, 0x08, 0x8E);
+	idt_set_gate(30, (unsigned)isr30, 0x08, 0x8E);
+	idt_set_gate(31, (unsigned)isr31, 0x08, 0x8E);
 }
 
 //const
 char *exception_messages[] =
-  {
-    "Division By Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
+{
+	"Division By Zero",
+	"Debug",
+	"Non Maskable Interrupt",
+	"Breakpoint",
+	"Into Detected Overflow",
+	"Out of Bounds",
+	"Invalid Opcode",
+	"No Coprocessor",
 
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment Not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Unknown Interrupt",
+	"Double Fault",
+	"Coprocessor Segment Overrun",
+	"Bad TSS",
+	"Segment Not Present",
+	"Stack Fault",
+	"General Protection Fault",
+	"Page Fault",
+	"Unknown Interrupt",
 
-    "Coprocessor Fault",
-    "Alignment Check",
-    "Machine Check",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
+	"Coprocessor Fault",
+	"Alignment Check",
+	"Machine Check",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
 
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved"
-  };
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved"
+};
 /**
-   All ISRs point here
- */
+  All ISRs point here
+  */
 void page_fault(struct regs *r);
 void fault_handler(struct regs *r)
 {
-  serial_writes("ISR fault_handler\n");
-  if (r->int_no < 32)
-    {
-      switch(r->int_no)
+	serial_writes("ISR fault_handler\n");
+	if (r->int_no < 32)
 	{
-	case 14:
-	  page_fault(r);
-	default:
-	  printf("\n%s Exception. System Halted\n", exception_messages[r->int_no]);
-	  serial_writes(exception_messages[r->int_no]);
-	  serial_writes(" Exception. System Halted\n");
+		switch(r->int_no)
+		{
+			// Don't deal with this yet
+			//			case 14:
+			//				page_fault(r);
+			default:
+				printf("\n%s Exception. System Halted\n",
+						exception_messages[r->int_no]);
+				serial_writes(exception_messages[r->int_no]);
+				serial_writes(" Exception. System Halted\n");
+		}
+		for (;;);
+	}else{
+		serial_writes("INT NO > 32 \n");
+		serial_writed(r->int_no);
+		for(;;);
 	}
-      for (;;);
-    }
-  else
-    {
-      serial_writes("INT NO > 32 \n");
-      serial_writed(r->int_no);
-      for(;;);
-    }
 }
 
 void page_fault(struct regs *r)
 {
-   // A page fault has occurred.
-   // The faulting address is stored in the CR2 register.
-   uint32_t faulting_address;
-   asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
+	// A page fault has occurred.
+	// The faulting address is stored in the CR2 register.
+	uint32_t faulting_address;
+	asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
 
-   // The error code gives us details of what happened.
-   int present   = !(r->err_code & 0x1); // Page not present
-   int rw = r->err_code & 0x2;           // Write operation?
-   int us = r->err_code & 0x4;           // Processor was in user-mode?
-   int reserved = r->err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
-   int id = r->err_code & 0x10;          // Caused by an instruction fetch?
+	// The error code gives us details of what happened.
+	int present   = !(r->err_code & 0x1);	// Page not present
+	int rw = r->err_code & 0x2;				// Write operation?
+	int us = r->err_code & 0x4;				// Processor was in user-mode?
+	int reserved = r->err_code & 0x8;		// Overwritten CPU-reserved 
+	// 	bits of page entry?
 
-   // Output an error message.
-   serial_writes("Page fault! ( ");
-   if (present) {serial_writes("present ");}
-   if (rw) {serial_writes("read-only ");}
-   if (us) {serial_writes("user-mode ");}
-   if (reserved) {serial_writes("reserved ");}
-   serial_writes(") at 0x");
-   serial_writed(faulting_address);
-   serial_writes("\n");
-   for(;;);
+	int id = r->err_code & 0x10;			// Caused by an instruction 
+	//	fetch?
+
+	// Output an error message.
+	serial_writes("Page fault! ( ");
+	if (present) {serial_writes("present ");}
+	if (rw) {serial_writes("read-only ");}
+	if (us) {serial_writes("user-mode ");}
+	if (reserved) {serial_writes("reserved ");}
+	serial_writes(") at 0x");
+	serial_writed(faulting_address);
+	serial_writes("\n");
+	for(;;);
 }
