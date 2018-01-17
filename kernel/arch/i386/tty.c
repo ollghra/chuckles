@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <sys/io.h>
+
 #include <kernel/tty.h>
 
 #include "vga.h"
@@ -17,6 +19,33 @@ static size_t terminal_column;
 static uint8_t terminal_color;
 static uint16_t* terminal_buffer;
 
+/* This doesn't work 
+
+   void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
+   {
+   outw(0x0A, 0x3D4);
+   outw((inb(0x3D5) & 0xC0) | cursor_start, 0x3D5);
+
+   outw(0x0B, 0x3D4);
+   outw((inb(0x3E0) & 0xE0) | cursor_end, 0x3D5);
+   }
+
+   void disable_cursor()
+   {
+   outb(0x0A, 0x3D4);
+   outb(0x20, 0x3D5);
+   }
+
+   void update_cursor(int x, int y)
+   {
+   uint16_t pos = y * VGA_WIDTH + x;
+
+   outw(0x0F, 0x3D4);
+   outw((uint8_t) (pos & 0xFF), 0x3D5);
+   outw(0x0E, 0x3D4);
+   outw((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
+   }
+   */
 void terminal_initialise(void) {
 	terminal_row = 0;
 	terminal_column = 0;
@@ -28,6 +57,7 @@ void terminal_initialise(void) {
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
 	}
+	//enable_cursor(0, 15);
 }
 
 void terminal_setcolor(uint8_t color) {
@@ -76,6 +106,7 @@ void terminal_putchar(char c) {
 				}
 			}
 	}
+	//update_cursor(terminal_column, terminal_row);
 }
 
 void terminal_write(const char* data, size_t size) {

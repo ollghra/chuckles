@@ -122,7 +122,6 @@ char *exception_messages[] =
 /**
   All ISRs point here
   */
-void page_fault(struct regs *r);
 void fault_handler(struct regs *r)
 {
 	serial_writes("ISR fault_handler\n");
@@ -138,40 +137,13 @@ void fault_handler(struct regs *r)
 						exception_messages[r->int_no]);
 				serial_writes(exception_messages[r->int_no]);
 				serial_writes(" Exception. System Halted\n");
+				printf("Chaos reigns within.\nReflect, repent, and reboot.\nOrder shall return.");
 		}
 		for (;;);
 	}else{
+		printf("Exception № %d > 32\n", r->int_no);
 		serial_writes("INT NO > 32 \n");
 		serial_writed(r->int_no);
 		for(;;);
 	}
-}
-
-void page_fault(struct regs *r)
-{
-	// A page fault has occurred.
-	// The faulting address is stored in the CR2 register.
-	uint32_t faulting_address;
-	asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
-
-	// The error code gives us details of what happened.
-	int present   = !(r->err_code & 0x1);	// Page not present
-	int rw = r->err_code & 0x2;				// Write operation?
-	int us = r->err_code & 0x4;				// Processor was in user-mode?
-	int reserved = r->err_code & 0x8;		// Overwritten CPU-reserved 
-	// 	bits of page entry?
-
-	int id = r->err_code & 0x10;			// Caused by an instruction 
-	//	fetch?
-
-	// Output an error message.
-	serial_writes("Page fault! ( ");
-	if (present) {serial_writes("present ");}
-	if (rw) {serial_writes("read-only ");}
-	if (us) {serial_writes("user-mode ");}
-	if (reserved) {serial_writes("reserved ");}
-	serial_writes(") at 0x");
-	serial_writed(faulting_address);
-	serial_writes("\n");
-	for(;;);
 }
