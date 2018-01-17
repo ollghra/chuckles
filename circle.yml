@@ -11,7 +11,7 @@ dependencies:
         - sudo apt-get install libcloog-isl-dev
  
         # Build the cross compiler for your chosen target (replace i786-pc-elf if necessary).
-        - bash ./toolchain.sh i386-elf
+        - bash ./toolchain.sh i686-elf
 
     cache_directories:
         # Add the folder with our cross compiler to the cache. This way it will be kept between builds.
