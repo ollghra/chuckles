@@ -2,9 +2,8 @@
 set -e
  
 # Set the versions we will be using.
-binutils_version="2.27"
-gcc_version="6.3.0"
-newlib_version="2.4.0"
+binutils_version="2.29"
+gcc_version="7.2.0"
  
 # This script expects the target triplet (e.g. i786-pc-elf) as command line argument.
 target=$1
