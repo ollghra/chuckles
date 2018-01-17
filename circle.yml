@@ -21,7 +21,7 @@ compile:
     override:
         # Place here whatever commands are necessary to build your project.
         - bash ./build.sh
-        - ./iso.sh
+        - bash ./iso.sh
         # Copy any files you want to keep to the folder $CIRCLE_ARTIFACTS.
         - cp ./sysroot/boot/chuckles.kernel chuckles.iso $CIRCLE_ARTIFACTS/
 
