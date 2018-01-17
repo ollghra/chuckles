@@ -11,20 +11,19 @@ dependencies:
         - sudo apt-get install libcloog-isl-dev
  
         # Build the cross compiler for your chosen target (replace i786-pc-elf if necessary).
-        - bash ci/toolchain.sh i686-elf
+        - bash ./toolchain.sh i386-elf
 
     cache_directories:
         # Add the folder with our cross compiler to the cache. This way it will be kept between builds.
-        - ~/cross
+        - ~/opt/cross
 
 compile:
     override:
         # Place here whatever commands are necessary to build your project.
-        - bash build.sh
- 
+        - bash ./build.sh
+        - ./iso.sh
         # Copy any files you want to keep to the folder $CIRCLE_ARTIFACTS.
-        - 
-        - cp my_kernel my_image.iso $CIRCLE_ARTIFACTS/
+        - cp ./sysroot/boot/chuckles.kernel chuckles.iso $CIRCLE_ARTIFACTS/
 
 test:
     override:
@@ -32,5 +31,5 @@ test:
         #- bash your_test_suite.sh
  
         # You must place something here, even it it's just testing whether the output exists.
-        - test -f $CIRCLE_ARTIFACTS/my_kernel
-        - test -f $CIRCLE_ARTIFACTS/my_image.iso
+        - test -f $CIRCLE_ARTIFACTS/chuckles.kernel
+        - test -f $CIRCLE_ARTIFACTS/chuckles.iso
