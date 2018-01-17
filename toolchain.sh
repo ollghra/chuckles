@@ -18,23 +18,22 @@ then
 	cd /tmp/toolchain
  
 	# Download gcc sources if they are not yet downloaded.
-	if [ ! -f gcc-$gcc_version.tar.bz2 ]
+	if [ ! -f gcc-$gcc_version.tar.gz ]
 	then
-		wget -c -O gcc-$gcc_version.tar.bz2 ftp://ftp.gnu.org/gnu/gcc/gcc-$gcc_version/gcc-$gcc_version.tar.bz2
-		tar -xf gcc-$gcc_version.tar.bz2
+		wget -c -O gcc-$gcc_version.tar.gz ftp://ftp.gnu.org/gnu/gcc/gcc-$gcc_version/gcc-$gcc_version.tar.gz
+		tar -xf gcc-$gcc_version.tar.gz
 	fi
  
 	# Download binutils sources if they are not yet downloaded.
-	if [ ! -f binutils-$binutils_version.tar.bz2 ]
+	if [ ! -f binutils-$binutils_version.tar.gz ]
 	then
-		wget -c -O binutils-$binutils_version.tar.bz2 ftp://ftp.gnu.org/gnu/binutils/binutils-$binutils_version.tar.bz2
-		tar -xf binutils-$binutils_version.tar.bz2
+		wget -c -O binutils-$binutils_version.tar.gz ftp://ftp.gnu.org/gnu/binutils/binutils-$binutils_version.tar.gz
+		tar -xf binutils-$binutils_version.tar.gz
 	fi
  
 	# Create build paths.
 	mkdir -p /tmp/toolchain/build-binutils
 	mkdir -p /tmp/toolchain/build-gcc
-	mkdir -p /tmp/toolchain/build-newlib
  
 	# Build binutils.
 	cd /tmp/toolchain/build-binutils
