@@ -9,7 +9,7 @@ gcc_version="7.2.0"
 target=$1
  
 # The tools will be installed in ~/cross/$target.
-prefix=~/opt/cross/$target
+prefix=$HOME/opt/cross/$target
  
 # First check whether the toolchain was already built on a previous run of this script.
 if [ ! -d $prefix ]
@@ -38,7 +38,7 @@ then
 	# Build binutils.
 	cd /tmp/toolchain/build-binutils
 	sudo rm -rf *
-	/tmp/toolchain/binutils-$binutils_version/configure --target=$target --prefix=$prefix --disable-nls 2>&1
+	/tmp/toolchain/binutils-$binutils_version/configure --target=$target --prefix=$prefix --with-sysroot --disable-nls --disable-werror 2>&1
 	make all 2>&1
 	make install 2>&1
 	sudo rm -rf *
