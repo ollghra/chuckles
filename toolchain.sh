@@ -10,7 +10,7 @@ newlib_version="2.4.0"
 target=$1
  
 # The tools will be installed in ~/cross/$target.
-prefix=~/cross/$target
+prefix=~/opt/cross/$target
  
 # First check whether the toolchain was already built on a previous run of this script.
 if [ ! -d $prefix ]
