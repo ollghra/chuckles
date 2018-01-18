@@ -1,5 +1,8 @@
+*.o
 *.iso
 isodir
 sysroot
 *.log
 *~
+*.bin
+
