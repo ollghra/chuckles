@@ -1,3 +1,4 @@
+# IMPORTANT : spaces, not tabs
 dependencies:
     pre:
         # Install a few packages which will be needed for building the cross compiler.
@@ -9,7 +10,7 @@ dependencies:
         - sudo apt-get install texinfo
         - sudo apt-get install libisl-dev
         - sudo apt-get install libcloog-isl-dev
-	- sudo apt-get install xorriso
+        - sudo apt-get install xorriso
  
         # Build the cross compiler for your chosen target (replace i786-pc-elf if necessary).
         - bash ./toolchain.sh i686-elf
