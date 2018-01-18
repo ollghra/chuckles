@@ -1,4 +1,5 @@
 # Chuckles
+[![CircleCI](https://circleci.com/gh/TOR-/chuckles/tree/master.svg?style=svg)](https://circleci.com/gh/TOR-/chuckles/tree/master)
 ````
 |00| |00|  /00\  \0    0/ |000  x  |00\\  /00\  000|000 0|0 |000 |0\ 0  /00| |000  | O
 |0000000| |0--0|  \0  0/  |0--  x  |00// |0--0|   0|0   0|0 |0-- |0\\0 |0    |0--  | |
@@ -65,3 +66,5 @@ Be prepared for multiprocessing. A scheduler that is not ready for multiprocessi
 Design the scheduler in a way, so threads can have different priority levels.
 ### Thread Lists
 It is generally recommended there are different lists of threads for each state and priority level. This way, the scheduling code does not have to look through every thread for a high priority one, then possibly fail to find one, then iterate the thread list again to find a somewhat lower priority thread, then possibly fail again, etc. This means the scheduler code runs faster, since the lack of a thread of a specific priority level can be detected immediately, while also not iterating through inactive threads.
+# Binaries
+[i686-elf bootable iso](https://circleci.com/api/v1/project/TOR-/chuckles/latest/artifacts/0/$CIRCLE_ARTIFACTS/chuckles.iso)
