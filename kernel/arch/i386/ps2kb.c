@@ -56,7 +56,7 @@ void ps2kb_handler(struct regs *r)
 
 	struct key_event e;
 	e.flags = 0x1; // Set special bit by default
-	bool state;
+	bool state = false;
 	if(scancode == 0xF0)
 	{
 		state = false;

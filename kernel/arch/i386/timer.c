@@ -8,6 +8,8 @@
 #include <sys/io.h>
 #include <sys/debug.h>
 
+#include <kernel/process.h>
+
 uint32_t timer_ticks = 0;
 int seconds = 0;
 
@@ -16,6 +18,8 @@ int seconds = 0;
 void timer_handler(struct regs *r)
 {  
   timer_ticks++;
+  if(timer_ticks % 10 == 0)
+	  task_switch();		// Notify scheduler a context switch should occur
   if (timer_ticks % 100 == 0)
     {
       seconds++;

@@ -9,4 +9,7 @@ static inline int cpuid_string(int code, int where[4]) {
  
 const char * const cpu_string();
 
+extern unsigned long kernel_end_marker;
+extern unsigned long kernel_start_marker;
+
 #endif

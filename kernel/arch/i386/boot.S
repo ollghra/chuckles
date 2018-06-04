@@ -13,6 +13,9 @@
 .long FLAGS
 .long CHECKSUM
 
+
+.global stack_bottom
+.global stack_top
 # Reserve a stack for the initial thread.
 .section .bss
 .align 16

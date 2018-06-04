@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <kernel/process.h>
 
 #include <arch/i386/paging.h>
 #include <arch/i386/gdt.h>
@@ -19,9 +20,8 @@
 #include <sys/shell.h>
 #include <sys/multiboot.h>
 
-extern unsigned long kernel_end_marker;
-extern unsigned long kernel_start_marker;
-
+void kernel_main(unsigned int ebx);
+void kernel_early(void);
 void kernel_end(void);
 void current_test(void);
 
@@ -38,14 +38,16 @@ void kernel_early(void)
 	ps2_init();
 	ps2kb_init();
 	__asm__ __volatile__ ("sti");
+
+	//init_multitasking();
 }
 
 void kernel_main(unsigned int ebx)
 {
 	kernel_early();
-	printf("Kernel start: 0x%x, kernel end: 0x%x",
+	printf("Kernel start: 0x%x, kernel end: 0x%x\n",
 		   	&kernel_start_marker, &kernel_end_marker);
-
+	printf("Kernel stack: bottom 0x%x, top 0x%x\n", &stack_bottom, &stack_top);
 	printf("Well, Chuckles\nChuckle away\n");
 	current_test();
 	kernel_end();
@@ -56,8 +58,18 @@ void kernel_end()
 	for(;;);
 }
 
+void pA()
+{
+	timer_wait(100);
+	printf("A");
+}
+
 void current_test(void)
 {
+	/* Currently working on a multitasking kernel */
+	// Clock interrupt every 10ms to switch task
+	//
+
 	/*multiboot_info_t *mbinfo = (multiboot_info_t *) ebx;
 	unsigned int address_of_module = mbinfo->mods_addr;
 	printf("ebx: %x\nmodule address: %x\nflags: %x\nmods_count: %x\n", ebx, address_of_module, mbinfo->flags, mbinfo->mods_count);

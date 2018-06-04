@@ -26,4 +26,8 @@ serial_writed(int i)
 {
   serial_writes(itoa(i));
 }
+int debug_printf(const char* restrict format, ...);
+
+extern unsigned stack_bottom;
+extern unsigned stack_top;
 #endif
