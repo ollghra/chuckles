@@ -12,6 +12,7 @@ LIBS?=
 
 DESTDIR?=
 PREFIX?=/usr/local
+#PREFIX?=/home/tor/opt/cross
 EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
@@ -34,6 +35,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
+kernel/log.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \

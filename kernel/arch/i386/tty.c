@@ -7,16 +7,20 @@
 
 #include <kernel/tty.h>
 
-#include "vga.h"
+#include <arch/i386/vga.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 static const size_t VGA_MEM_SIZE = 2000;	// 80*25 
 
+static uint8_t terminal_background;
+static uint8_t terminal_foreground;
+
 static size_t terminal_row;
 static size_t terminal_column;
-static uint8_t terminal_color;
+static uint8_t terminal_colour;
+static uint8_t terminal_blank_colour;
 static uint16_t* terminal_buffer;
 
 /* This doesn't work 
@@ -49,35 +53,37 @@ static uint16_t* terminal_buffer;
 void terminal_initialise(void) {
 	terminal_row = 0;
 	terminal_column = 0;
-	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+	terminal_foreground = VGA_COLOUR_LIGHT_GREY;
+	terminal_background = VGA_COLOUR_BLACK;
+	terminal_blank_colour = vga_entry_colour(VGA_COLOUR_BLACK, VGA_COLOUR_BLACK);
 	terminal_buffer = VGA_MEMORY;
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', terminal_color);
+			terminal_buffer[index] = vga_entry(' ', vga_entry_colour(terminal_foreground,terminal_background));
 		}
 	}
 	//enable_cursor(0, 15);
 }
 
-void terminal_setcolor(uint8_t color) {
-	terminal_color = color;
+void terminal_setcolour(uint8_t fg, uint8_t bg) {
+	terminal_foreground = fg;
+	terminal_background = bg;
 }
 
-void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
+void terminal_putentryat(unsigned char c, uint8_t vga_attr, size_t x, size_t y) {
 	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
+	terminal_buffer[index] = vga_entry(c, vga_attr);
 }
 
 void terminal_cls()
 {
 	int i = VGA_WIDTH * VGA_HEIGHT;
 	for(; i >= 0; i--)
-		terminal_buffer[i] = vga_entry(' ', 
-				vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_BLACK));
+		terminal_buffer[i] = vga_entry(' ', terminal_blank_colour);
 }
 
-void terminal_putchar(char c) {
+void terminal_putchar_attr(char c, uint8_t vga_attr) {
 	unsigned char uc = c;
 	switch(uc)
 	{
@@ -92,7 +98,7 @@ void terminal_putchar(char c) {
 				terminal_row++;
 			break;
 		default:
-			terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
+			terminal_putentryat(uc, vga_attr, terminal_column, terminal_row);
 			terminal_column++;
 
 			if (terminal_column == VGA_WIDTH) {
@@ -107,6 +113,22 @@ void terminal_putchar(char c) {
 			}
 	}
 	//update_cursor(terminal_column, terminal_row);
+}
+size_t terminal_write_attr(const char* data, size_t size, uint8_t vga_attr) {
+	size_t i = 0;
+	for (; i < size; i++)
+		terminal_putchar_attr(data[i], vga_attr);
+	return i;
+}
+
+size_t terminal_writestring_attr(const char* data, uint8_t vga_attr) {
+	return terminal_write_attr(data, strlen(data), vga_attr);
+}
+
+void terminal_putchar(char c)
+{
+	terminal_putchar_attr(c,
+			vga_attr(VGA_CTL_NOBLINK,terminal_foreground,VGA_CTL_INTHIGH,terminal_background));
 }
 
 void terminal_write(const char* data, size_t size) {

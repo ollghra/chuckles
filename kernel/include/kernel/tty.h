@@ -2,10 +2,12 @@
 #define _KERNEL_TTY_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 void terminal_initialise(void);
 void terminal_putchar(char c);
 void terminal_write(const char* data, size_t size);
 void terminal_writestring(const char* data);
+size_t terminal_writestring_attr(const char* data, uint8_t vga_attr);
 
 #endif

@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <kernel/log.h>
 
 #include <arch/i386/paging.h>
 #include <arch/i386/gdt.h>
@@ -43,6 +44,7 @@ void kernel_early(void)
 void kernel_main(unsigned int ebx)
 {
 	kernel_early();
+	klog("LOG MESSAGE\n");
 	printf("Kernel start: 0x%x, kernel end: 0x%x",
 		   	&kernel_start_marker, &kernel_end_marker);
 
