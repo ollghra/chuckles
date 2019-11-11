@@ -6,3 +6,5 @@ sysroot
 *~
 *.bin
 
+# BOCHSOUT
+bochsout.txt
