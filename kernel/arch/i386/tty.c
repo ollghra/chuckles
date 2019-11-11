@@ -23,47 +23,45 @@ static uint8_t terminal_colour;
 static uint8_t terminal_blank_colour;
 static uint16_t* terminal_buffer;
 
-/* This doesn't work 
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
+{
+	outw(0x3D4, 0x0A);
+	outw(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
 
-   void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
-   {
-   outw(0x0A, 0x3D4);
-   outw((inb(0x3D5) & 0xC0) | cursor_start, 0x3D5);
+	outw(0x3D4, 0x0B);
+	outw(0x3D5, (inb(0x3E0) & 0xE0) | cursor_end);
+}
 
-   outw(0x0B, 0x3D4);
-   outw((inb(0x3E0) & 0xE0) | cursor_end, 0x3D5);
-   }
+void disable_cursor()
+{
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
+}
+void update_cursor(uint8_t x, uint8_t y)
+{
+	uint16_t pos = y * VGA_WIDTH + x;
 
-   void disable_cursor()
-   {
-   outb(0x0A, 0x3D4);
-   outb(0x20, 0x3D5);
-   }
-
-   void update_cursor(int x, int y)
-   {
-   uint16_t pos = y * VGA_WIDTH + x;
-
-   outw(0x0F, 0x3D4);
-   outw((uint8_t) (pos & 0xFF), 0x3D5);
-   outw(0x0E, 0x3D4);
-   outw((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
-   }
-   */
+	outw(0x3D4, 0x0F);
+	outw(0x3D5, (uint8_t) (pos & 0xFF));
+	outw(0x3D4, 0x0E);
+	outw(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}
 void terminal_initialise(void) {
 	terminal_row = 0;
 	terminal_column = 0;
-	terminal_foreground = VGA_COLOUR_LIGHT_GREY;
+	terminal_foreground = VGA_COLOUR_GREEN;
 	terminal_background = VGA_COLOUR_BLACK;
-	terminal_blank_colour = vga_entry_colour(VGA_COLOUR_BLACK, VGA_COLOUR_BLACK);
+	terminal_blank_colour = vga_entry_colour(terminal_foreground,terminal_background);
 	terminal_buffer = VGA_MEMORY;
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', vga_entry_colour(terminal_foreground,terminal_background));
+			terminal_buffer[index] = vga_entry(' ',
+					vga_attr(0,terminal_background, 1, terminal_foreground));
+					//vga_entry_colour(terminal_foreground,terminal_background));
 		}
 	}
-	//enable_cursor(0, 15);
+	enable_cursor(0, 15);
 }
 
 void terminal_setcolour(uint8_t fg, uint8_t bg) {
@@ -112,7 +110,7 @@ void terminal_putchar_attr(char c, uint8_t vga_attr) {
 				}
 			}
 	}
-	//update_cursor(terminal_column, terminal_row);
+	update_cursor(terminal_column, terminal_row);
 }
 size_t terminal_write_attr(const char* data, size_t size, uint8_t vga_attr) {
 	size_t i = 0;
