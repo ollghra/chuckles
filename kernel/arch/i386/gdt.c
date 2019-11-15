@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include <arch/i386/gdt.h>
+#include <arch/i386/tss.h>
 
 #include <sys/debug.h>
 /*
@@ -108,6 +109,10 @@ gdt_flush();
 		SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) |				\
 		SEG_PRIV(3)     | SEG_DATA_RDWR
 
+#define GDT_TSS_PL3  SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) |	\
+		SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) |				\
+		SEG_PRIV(3)     | SEG_DATA_RDWR
+
 struct gdt_entry
 {
 	uint16_t limit_low;
@@ -126,7 +131,7 @@ struct gdt_ptr
 
 //struct gdt_entry gdt[5];
 
-uint64_t gdt[5];
+uint64_t gdt[7];
 
 struct gdt_ptr gp;
 
@@ -155,6 +160,8 @@ void create_descriptor(int num, uint32_t base, uint32_t limit, uint16_t flag)
 
 extern void setGdt();
 
+struct tss default_tss;
+
 void gdt_initialise()
 {
 	gp.limit = (sizeof(struct gdt_entry) * 5) - 1;
@@ -163,16 +170,30 @@ void gdt_initialise()
 	serial_writes(itoa(gp.base));
 	serial_writec('\n');
 
+	// TSS initialisation
+	default_tss.debug_flag = 0x00;
+	default_tss.io_map = 0x00;
+	default_tss.esp0 = 0x20000;
+	default_tss.ss0 = 0x18;
 
 	create_descriptor(0, 0, 0, 0);
 	create_descriptor(1, 0, 0x000FFFFF, (GDT_CODE_PL0));
 	create_descriptor(2, 0, 0x000FFFFF, (GDT_DATA_PL0));
 	create_descriptor(3, 0, 0x000FFFFF, (GDT_CODE_PL3));
 	create_descriptor(4, 0, 0x000FFFFF, (GDT_DATA_PL3));
+	create_descriptor(5, 0, 0x20      , 0x0DF7);
+	create_descriptor(6, (uint32_t) &default_tss, 0x67, 0x00E9);
 
 	setGdt();
 	serial_writes("GDT set\n");
 	gdt_flush();
 	serial_writes("GDT flushed\n");
+	
+	// TSS loading
+	asm("movw $0x30, %ax\n\
+			ltr %ax");
+	asm("movw %%ss, %0\n\
+			movl %%esp, %1" : "=m" (default_tss.ss0), "=m" (default_tss.esp0) : );
+
 }
 

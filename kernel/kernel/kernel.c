@@ -10,6 +10,7 @@
 #include <arch/i386/isr.h>
 #include <arch/i386/irq.h>
 #include <arch/i386/timer.h>
+#include <arch/i386/tss.h>
 #include <arch/i386/ps2.h>
 #include <arch/i386/ps2kb.h>
 
@@ -58,8 +59,36 @@ void kernel_end()
 	for(;;);
 }
 
+void task1(void)
+{
+#define PORT 0x3f8    // COM1
+	while(1){
+	  while((inb(PORT + 5) & 0x20) == 0);  
+	  outb(PORT, '.');
+	}
+	return;
+}
+
+extern struct tss default_tss;
+
 void current_test(void)
 {
+	memcpy((char*) 0x30000, &task1,100);	
+	asm("	cli\n\
+			push $0x2B\n\
+			push $0x30000\n\
+			pushfl\n\
+			popl %%eax\n\
+			orl $0x200,%%eax\n\
+			and $0xffffbfff, %%eax\n\
+			push %%eax\n\
+			push $0x23\n\
+			push $0x0\n\
+			movl $0x20000, %0\n\
+			movw $0x2B, %%ax\n\
+			movw %%ax, %%ds\n\
+			iret" : "=m" (default_tss.esp0) :);
+
 	/*multiboot_info_t *mbinfo = (multiboot_info_t *) ebx;
 	unsigned int address_of_module = mbinfo->mods_addr;
 	printf("ebx: %x\nmodule address: %x\nflags: %x\nmods_count: %x\n", ebx, address_of_module, mbinfo->flags, mbinfo->mods_count);
