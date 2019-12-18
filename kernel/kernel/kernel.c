@@ -55,6 +55,8 @@ void kernel_early(void)
 	ps2_init();
 	ps2kb_init();
 	__asm__ __volatile__ ("sti");
+
+  serial_writes("\nKERNEL_EARLY FINISHED\n");
 }
 
 void kernel_main(unsigned int ebx)

@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <arch/i386/gdt.h>
+#include <arch/i386/tss.h>
 
 #include <sys/debug.h>
 
@@ -97,41 +98,48 @@ void create_descriptor(int num, uint32_t base, uint32_t limit, uint16_t flag)
 	gdt[num] = descriptor;
 }
 
-// properly reload the new segment registers 
+// properly reload the new segment registers and load gdt
 extern void gdt_flush();
 // load tss
 extern void tss_flush();
-extern void setGdt();
 
 tss_entry_t tss;
+static void write_tss(uint32_t num, uint16_t ss0, uint32_t esp0)
+{
+	create_descriptor(num, (uint32_t) &tss, ((uint32_t) &tss) + sizeof(tss), (GDT_TSS));
+	memset(&tss, 0, sizeof(tss));
+	tss.ss0 = ss0;
+	tss.esp0 = esp0;
+    tss.cs = 0x0b;
+    tss.ss = 0x13;
+    tss.ds = 0x13;
+    tss.es = 0x13;
+    tss.fs = 0x13;
+    tss.gs = 0x13;
+	tss.iomap_base = sizeof(tss);	
+}
 
 void gdt_initialise()
 {
 	gp.limit = (sizeof(struct gdt_entry) * NUM_GDT_ENTRIES) - 1;
-	gp.base = (unsigned int *) &gdt;
+	gp.base = (uint32_t) &gdt;
 	serial_writes("&GDT: ");
 	serial_writes(itoa(gp.base));
 	serial_writec('\n');
 
 
 	create_descriptor(0, 0, 0, 0);
-	create_descriptor(1, 0, 0x000FFFFF, (GDT_CODE_PL0));
-	create_descriptor(2, 0, 0x000FFFFF, (GDT_DATA_PL0));
-	create_descriptor(3, 0, 0x000FFFFF, (GDT_CODE_PL3));
-	create_descriptor(4, 0, 0x000FFFFF, (GDT_DATA_PL3));
+	create_descriptor(1, 0, 0xFFFFFFFF, (GDT_CODE_PL0));
+	create_descriptor(2, 0, 0xFFFFFFFF, (GDT_DATA_PL0));
+	create_descriptor(3, 0, 0xFFFFFFFF, (GDT_CODE_PL3));
+	create_descriptor(4, 0, 0xFFFFFFFF, (GDT_DATA_PL3));
 	
 	/* Set up TSS */
-	create_descriptor(5, (uint32_t) &tss, sizeof(tss), (GDT_TSS));
-	memset(&tss, 0, sizeof(tss));
-	tss.ss0 = 16;
-	tss.esp0 = 0x10B8EC;
-	tss.iomap_base = sizeof(tss);	
+	write_tss(5,0x10,0);
 
-	setGdt();
-	serial_writes("GDT set\n");
-	gdt_flush();
+	gdt_flush((uintptr_t)&gp);
 	serial_writes("GDT flushed\n");
-	//tss_flush();
+	tss_flush();
 	serial_writes("TSS flushed\n");
 }
 
