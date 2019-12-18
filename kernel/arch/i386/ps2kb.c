@@ -147,8 +147,6 @@ void ps2kb_init(void)
 
 	kb_map = gb;
 
-	printf("Keyboard Installed\n");
-	printf("WARNING! THIS REALLY DOESN't WORK");
-	serial_writes("Keyboard install\n");
+	serial_writes("ps2 keyboard installed [WARNING! THIS REALLY DOESN't WORK]\n");
 }
 

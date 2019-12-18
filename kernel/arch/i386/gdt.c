@@ -99,7 +99,7 @@ void create_descriptor(int num, uint32_t base, uint32_t limit, uint16_t flag)
 }
 
 // properly reload the new segment registers and load gdt
-extern void gdt_flush();
+extern void gdt_flush(uintptr_t gdtp);
 // load tss
 extern void tss_flush();
 

@@ -53,7 +53,7 @@ void kernel_early(void)
 	irq_install();
 	timer_install();
 	ps2_init();
-	ps2kb_init();
+	//ps2kb_init();
 	__asm__ __volatile__ ("sti");
 
   serial_writes("\nKERNEL_EARLY FINISHED\n");
@@ -62,6 +62,7 @@ void kernel_early(void)
 void kernel_main(unsigned int ebx)
 {
 	kernel_early();
+  /*
 	uint32_t ds, ss;
 	asm("	movl %%ds, %0\n\
 			movl %%ss, %1\n" :
@@ -72,7 +73,7 @@ void kernel_main(unsigned int ebx)
 	serial_writes(", KERNEL SS:");
 	serial_writed(ss);
 	serial_writes("\n");
-
+  */
 	klog("LOG MESSAGE\n");
 	printf("Kernel start: 0x%x, kernel end: 0x%x",
 		   	&kernel_start_marker, &kernel_end_marker);
@@ -87,8 +88,21 @@ void kernel_end()
 	for(;;);
 }
 
+void task1(void)
+{
+  asm("mov $0xDEADBABA, %ecx\n");
+  while(1);
+  return;
+}
+
+extern void switch_task();
+
 void current_test(void)
 {
+  memcpy((uint8_t)0x30000,&task1,100);
+  kinfo("READY TO TASK\n");
+  switch_task();
+
 	/*multiboot_info_t *mbinfo = (multiboot_info_t *) ebx;
 	unsigned int address_of_module = mbinfo->mods_addr;
 	printf("ebx: %x\nmodule address: %x\nflags: %x\nmods_count: %x\n", ebx, address_of_module, mbinfo->flags, mbinfo->mods_count);
