@@ -1,70 +1,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <arch/i386/gdt.h>
 
 #include <sys/debug.h>
-/*
 
-   Old Implementation
-
-   struct gdt_entry
-   {
-   uint16_t limit_low;
-   uint16_t base_low;
-   uint8_t base_middle;
-   uint8_t access;
-   uint8_t granularity;
-   uint8_t base_high;
-   } __attribute__((packed));
-
-   struct gdt_ptr
-   {
-   unsigned short limit;
-   unsigned int base;
-   } __attribute__((packed));
-
-   struct gdt_entry gdt[3];
-
-   struct gdt_ptr gp;
-
-// properly reload the new segment registers 
-extern void gdt_flush();
-
-void gdt_set_descriptor(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran)
-{
-gdt[num].base_low = (base & 0xFFFF);
-gdt[num].base_middle = (base >> 16) & 0xFF;
-gdt[num].base_high = (base >> 24) & 0xFF;
-
-gdt[num].limit_low = (limit & 0xFFFF);
-gdt[num].granularity = ((limit >> 16) & 0x0F);
-
-gdt[num].granularity |= (gran & 0xF0);
-gdt[num].access = access;
-}
-
-void gdt_initialise()
-{
-// Setup the GDT pointer and limit 
-gp.limit = (sizeof(struct gdt_entry) * 3) - 1;
-gp.base = (unsigned int) &gdt;
-
-// NULL descriptor 
-gdt_set_descriptor(0, 0, 0, 0, 0);
-
-// Code Segment
-// Base: 0, Limit: 4GBytes, 4KB granularity, 32-bit opcodes
-gdt_set_descriptor(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
-
-// Data Segment 
-gdt_set_descriptor(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
-
-// Flush old GDT and install new changes
-gdt_flush();
-}
-*/
 // Each define here is for a specific flag in the descriptor.
 // Refer to the intel documentation for a description of what each one does.
 #define SEG_DESCTYPE(x)  ((x) << 0x04) // Descriptor type (0 for system, 1 for code/data)
@@ -108,6 +50,10 @@ gdt_flush();
 		SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) |				\
 		SEG_PRIV(3)     | SEG_DATA_RDWR
 
+#define GDT_TSS      SEG_DESCTYPE(0) | SEG_PRES(1) | SEG_SAVL(0) |	\
+		SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(0) |				\
+		SEG_PRIV(0)     | SEG_CODE_EXA
+
 struct gdt_entry
 {
 	uint16_t limit_low;
@@ -126,12 +72,10 @@ struct gdt_ptr
 
 //struct gdt_entry gdt[5];
 
-uint64_t gdt[5];
+#define NUM_GDT_ENTRIES 6
+uint64_t gdt[NUM_GDT_ENTRIES];
 
 struct gdt_ptr gp;
-
-// properly reload the new segment registers 
-extern void gdt_flush();
 
 void create_descriptor(int num, uint32_t base, uint32_t limit, uint16_t flag)
 {
@@ -153,11 +97,17 @@ void create_descriptor(int num, uint32_t base, uint32_t limit, uint16_t flag)
 	gdt[num] = descriptor;
 }
 
+// properly reload the new segment registers 
+extern void gdt_flush();
+// load tss
+extern void tss_flush();
 extern void setGdt();
+
+tss_entry_t tss;
 
 void gdt_initialise()
 {
-	gp.limit = (sizeof(struct gdt_entry) * 5) - 1;
+	gp.limit = (sizeof(struct gdt_entry) * NUM_GDT_ENTRIES) - 1;
 	gp.base = (unsigned int *) &gdt;
 	serial_writes("&GDT: ");
 	serial_writes(itoa(gp.base));
@@ -169,10 +119,19 @@ void gdt_initialise()
 	create_descriptor(2, 0, 0x000FFFFF, (GDT_DATA_PL0));
 	create_descriptor(3, 0, 0x000FFFFF, (GDT_CODE_PL3));
 	create_descriptor(4, 0, 0x000FFFFF, (GDT_DATA_PL3));
+	
+	/* Set up TSS */
+	create_descriptor(5, (uint32_t) &tss, sizeof(tss), (GDT_TSS));
+	memset(&tss, 0, sizeof(tss));
+	tss.ss0 = 16;
+	tss.esp0 = 0x10B8EC;
+	tss.iomap_base = sizeof(tss);	
 
 	setGdt();
 	serial_writes("GDT set\n");
 	gdt_flush();
 	serial_writes("GDT flushed\n");
+	//tss_flush();
+	serial_writes("TSS flushed\n");
 }
 

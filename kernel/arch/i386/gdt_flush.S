@@ -1,5 +1,6 @@
 .globl gdt_flush
 .globl setGdt
+.globl tss_flush
 
 setGdt:
 	movl 4(%esp), %eax
@@ -36,4 +37,18 @@ flush:
 	movw %ax, %fs
 	movw %ax, %gs
 	movw %ax, %ss
+
+  // Load (index|RPL of 3) of TSS descriptor
+  // index is 5*8=0x28 and RPL is 3, 0x28|0x03 = 0x2B
+  movw $0x2B, %ax
+  ltr %ax // Load tss state register
+
 	ret
+/*
+tss_flush:
+  // Load (index|RPL of 3) of TSS descriptor
+  // index is 5*8=0x28 and RPL is 3, 0x28|0x03 = 0x2B
+  movw $0x2B, %ax
+  ltr %ax // Load tss state register
+  ret
+*/

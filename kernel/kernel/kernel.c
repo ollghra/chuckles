@@ -28,9 +28,25 @@ void current_test(void);
 
 void kernel_early(void)
 {
+	/*
+	uint16_t ds, ss;
+	asm("	movw %%ds, %0\n\
+			movw %%ss, %1\n" :
+			"=r" (ds), "=r" (ss));
+	serial_writed(__LINE__);
+	serial_writes(":KERNEL DS:");
+	serial_writed(ds);
+	serial_writes(", KERNEL SS:");
+	serial_writed(ss);
+	serial_writes("\n");
+	*/
+	uint32_t esp;
+	asm("movl %%esp, %0\n" : "=r" (esp));
 	serial_initialise();
 	serial_writes(__DATE__ "\t" __TIME__ "\n");
+	serial_writed(esp);
 	gdt_initialise();
+	serial_writed(__LINE__);
 	terminal_initialise();
 	idt_init();
 	isrs_install();
@@ -44,6 +60,17 @@ void kernel_early(void)
 void kernel_main(unsigned int ebx)
 {
 	kernel_early();
+	uint32_t ds, ss;
+	asm("	movl %%ds, %0\n\
+			movl %%ss, %1\n" :
+			"=r" (ds), "=r" (ss));
+	serial_writed(__LINE__);
+	serial_writes(":KERNEL DS:");
+	serial_writed(ds);
+	serial_writes(", KERNEL SS:");
+	serial_writed(ss);
+	serial_writes("\n");
+
 	klog("LOG MESSAGE\n");
 	printf("Kernel start: 0x%x, kernel end: 0x%x",
 		   	&kernel_start_marker, &kernel_end_marker);
