@@ -406,11 +406,15 @@ irq15:
     jmp irq_common_stub
 
 irq_common_stub:
-    pusha
+    pushal
     push %ds
     push %es
     push %fs
     push %gs
+    push %ebx
+    mov $0x10,%bx
+    mov %bx,%ds
+    pop %ebx
     mov $0x10, %ax
     mov %ax, %ds
     mov %ax, %es
@@ -425,6 +429,40 @@ irq_common_stub:
     pop %fs
     pop %es
     pop %ds
-    popa
+    popal
     add $8, %esp
     iret
+
+//================
+//= SYSCALL CODE =
+//================
+.macro  SAVE_REGS
+        pushal 
+        push %ds
+        push %es
+        push %fs
+        push %gs 
+        push %ebx
+        mov $0x10,%bx
+        mov %bx,%ds
+        pop %ebx
+.endm
+
+.macro  RESTORE_REGS
+        pop %gs
+        pop %fs
+        pop %es
+        pop %ds
+        popal
+.endm
+
+.global syscall_handle
+syscall_handle:
+  mov $0xDEADCAFE, %edx
+  cli
+  SAVE_REGS
+  push %eax
+  call syscall
+  pop %eax
+  RESTORE_REGS
+  iret

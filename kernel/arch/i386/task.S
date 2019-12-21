@@ -22,3 +22,22 @@ switch_task:
   movw %ax, %dx
   
   iret  // BOOM
+
+.global task2
+task2:
+  mov $0xDADAFAFA, %ecx
+  
+  mov $0x30022, %ebx
+
+  mov $0xDADAFFAA, %ecx
+  mov $0x01, %eax
+  mov $0xDADAFFAB, %ecx
+  int $0x30
+  //asm volatile ("mov %0, %%ebx\n mov $0x01, %%eax\n int $0x30\n" :: "a" (0x100));
+  //asm volatile ("mov $0x39000, %%ebx\n mov $0x01, %%eax\n int $0x30\n":);
+  //asm("mov $0x1, %%eax\nint $0x30\n":);
+  mov $0xDEADBABA, %ecx
+loop:
+  jmp loop 
+msg:
+  .byte 'D','O,'N','K',0

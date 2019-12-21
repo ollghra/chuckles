@@ -11,6 +11,7 @@
 uint32_t timer_ticks = 0;
 int seconds = 0;
 
+extern 
 /* Handles the timer. By default, the timer fires 18.222 times
  *  per second. Why 18.222Hz? Who knows? */
 void timer_handler(struct regs *r)
@@ -18,6 +19,8 @@ void timer_handler(struct regs *r)
   timer_ticks++;
   if (timer_ticks % 100 == 0)
     {
+      asm("movl %0, %%eax\n" : : "a" (0x12345678));
+      asm("movl %0, %%edx\n" : : "a" (seconds));
       seconds++;
     }
 }
