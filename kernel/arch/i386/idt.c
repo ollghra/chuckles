@@ -37,7 +37,7 @@ void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags)
 
 void idt_init()
 {
-	serial_writes("idt_init entered\n");
+	serial_writes("IDT INIT\n");
 	IDTp.limit = (sizeof (struct IDT_Gate) * 256) - 1;
 	IDTp.base = (uint32_t) &(IDT[0]);
 	memset(&IDT, 0, sizeof (struct IDT_Gate) * 256);
