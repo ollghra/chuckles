@@ -130,12 +130,10 @@ extern void task2();
 extern tss_entry_t tss;
 void current_test(void)
 {
-  char * msg = "USER\n";
   memcpy((uint8_t*)0x30000,&task2,100);
-  //memcpy((char)   0x200100,msg,5);
   kinfo("READY TO TASK\n");
-  //asm("mov $0x05, %%eax\nint $0x30\n":);
   switch_task();
+  /*
   asm("  \n\
   movb $84, %%ax\n\
   outb %%ax, $0x3f8 \n\ 
@@ -156,4 +154,5 @@ void current_test(void)
   movw %%ax, %%dx\n\
   \
   iret  // BOOM\n": "=m" (tss.esp0));
+*/
 }

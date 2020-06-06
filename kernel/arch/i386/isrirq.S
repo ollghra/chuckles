@@ -465,4 +465,5 @@ syscall_handle:
   call syscall
   pop %eax
   RESTORE_REGS
+  mov $0xD0D0CAFE, %edx
   iret

@@ -19,13 +19,13 @@ extern struct gdt_ptr gp;
 
 void syscall(uint32_t number)
 {
-  uint32_t ds_sel_offset, ds_base;
+  //uint32_t ds_sel_offset, ds_base;
 
   // TODO:change this to a map
   if(number==SYS_PRINT)
   {
       printf("PRINT SYSCALL\n");
-      char * message;
+/*      char * message;
       asm("   mov 44(%%ebp), %%eax    \n \
               mov %%eax, %0           \n \
               mov 24(%%ebp), %%ax     \n \
@@ -37,7 +37,7 @@ void syscall(uint32_t number)
 
       // Add offset of base to message to locate char string
       puts((char *) (ds_base + message));
-  }
+  */}
   else
   {
       puts("SYSCALL\n");

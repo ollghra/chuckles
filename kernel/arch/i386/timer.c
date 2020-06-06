@@ -17,10 +17,11 @@ extern
 void timer_handler(struct regs *r)
 {  
   timer_ticks++;
+  if(timer_ticks % 10 == 0)
+    printf(".");
   if (timer_ticks % 100 == 0)
     {
-      asm("movl %0, %%eax\n" : : "a" (0x12345678));
-      asm("movl %0, %%edx\n" : : "a" (seconds));
+      printf("|");
       seconds++;
     }
 }
