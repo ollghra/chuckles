@@ -135,7 +135,7 @@ void ps2kb_handler(struct regs *r)
 
 void ps2kb_init(void)
 {
-	inb(0x60);
+	//inb(0x60);
 	irq_install_handler(1, ps2kb_handler);
 
 	ps2kb_state.lshift = false;
