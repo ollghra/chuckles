@@ -23,7 +23,7 @@ extern unsigned long kernel_end_marker;
 extern unsigned long kernel_start_marker;
 
 void kernel_end(void);
-void current_test(void);
+void current_test(multiboot_info_t* mbi);
 
 void kernel_early(void)
 {
@@ -46,15 +46,13 @@ void kernel_early(void)
   serial_writes("\nKERNEL_EARLY FINISHED\n");
 }
 
-void kernel_main(unsigned int ebx)
+void kernel_main(multiboot_info_t* mbi)
 {
 	kernel_early();
-	klog("LOG MESSAGE\n");
-	printf("Kernel start: 0x%x, kernel end: 0x%x",
+	printf("Kernel start: 0x%x, kernel end: 0x%x\n",
 		   	&kernel_start_marker, &kernel_end_marker);
 
-	printf("Well, Chuckles\nChuckle away\n");
-	current_test();
+	current_test(mbi);
 	kernel_end();
 }
 
@@ -63,6 +61,28 @@ void kernel_end()
 	for(;;);
 }
 
-void current_test(void)
+void current_test(multiboot_info_t* mbi)
 {
+    if (mbi->flags & 1)
+    {
+        printf("MEM LOWER %dKiB;", mbi->mem_lower);
+        printf("MEM UPPER %dKiB", mbi->mem_upper);
+        printf("\n");
+    }
+    if (mbi->flags & (1<<6))
+    {
+        printf("MMAPS FOUND: %d\n", mbi->mmap_length/((memory_map_t*)mbi->mmap_addr)->size);
+        int i = 0;
+        for (memory_map_t* mm = (memory_map_t*)mbi->mmap_addr
+                ; mm < (memory_map_t*)(mbi->mmap_addr + mbi->mmap_length)
+                ; mm=(memory_map_t*)((unsigned int) mm + mm->size + sizeof(mm->size)))
+        { 
+            printf("MMAP %d: <S:%x,BASE:%x,LEN:%x,T:%d>\n", i
+                    , mm->size
+                    , mm->base_addr_low + (mm->base_addr_high << sizeof(unsigned int))
+                    , mm->length_low + (mm->length_high << sizeof(unsigned int))
+                    , mm->type);
+            i++;
+        }
+    }
 }
