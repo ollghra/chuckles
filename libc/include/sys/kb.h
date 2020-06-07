@@ -14,6 +14,12 @@ struct key_event {
   uint8_t flags; // LSB[special, control, shift, alt, 0,0,0, downMSB]
 };
 
+#define KB_FLAG_SPECIAL (1<<0)
+#define KB_FLAG_CONTROL (1<<1)
+#define KB_FLAG_SHIFT   (1<<2)
+#define KB_FLAG_ALT     (1<<3)
+#define KB_FLAG_DOWN    (1<<7)
+
 #ifdef __cplusplus
 }
 #endif
