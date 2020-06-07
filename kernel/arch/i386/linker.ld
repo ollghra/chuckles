@@ -6,47 +6,45 @@ ENTRY(_start)
    kernel image. */
 SECTIONS
 {
-	/* Begin putting sections at 1 MiB, (0x100000)
-	a conventional place for kernels to be
-	   loaded at by the bootloader. */
-	. = 1M;
+	/* Kernel lives at 3GiB+1MiB in virtual address space
+     * Mapped to 1MiB in physical address space */
+	. = 0xC0100000;
 
 	kernel_start_marker = .;
-	/* First put the multiboot header, 
-	   as it is required to be put very early
-	   early in the image or the bootloader won't 
-	   recognize the file format.
+	/* First put the multiboot header, as it is required to be put very early in the image
+     * or the bootloader won't recognize the file format.
 	   Next we'll put the .text section. */
-	.text BLOCK(4K) : ALIGN(4K)
+	.text ALIGN(4K) : AT (ADDR (.text) - 0xC0000000)
 	{
 		*(.multiboot)
 		*(.text)
 	}
 
 	/* Read-only data. */
-	.rodata BLOCK(4K) : ALIGN(4K)
+	.rodata ALIGN(4K) : AT (ADDR (.rodata) - 0xC0000000)
 	{
 		*(.rodata)
 	}
 
 	/* Read-write data (initialised) */
-	.data BLOCK(4K) : ALIGN(4K)
+	.data ALIGN(4K) : AT (ADDR (.data) - 0xC0000000)
 	{
 		*(.data)
 	}
 
 	/* Read-write data (uninitialised) and stack */
-	.bss BLOCK(4K) : ALIGN(4K)
+	.bss ALIGN(4K) : AT (ADDR (.bss) - 0xC0000000)
 	{
 		*(COMMON)
 		*(.bss)
+        *(.bootstrap_stack)
 	}
 
 	/* The compiler may produce other sections,
 	   put them in the proper place in this file
 	   if you'd like to include them in the final kernel. */
 
-	.endkernel ALIGN(4K) : AT(ADDR(.endkernel))
+	.endkernel ALIGN(4K) : AT(ADDR(.endkernel) - 0xC0000000)
 	{
 		kernel_end_marker = .;
 		LONG(0xDEADBABA);
