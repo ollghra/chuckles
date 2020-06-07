@@ -140,14 +140,18 @@ void ps2kb_handler(struct regs *r)
             ps2kb_state.rshift = state;
             break;
         default:
-            // Must be a printable character
-            // Convert to utf-8 equivalent (not really utf-8)
+            // Find utf-8 equivalent if not modified
             e.flags = 0 + // Special bit unset, i.e. character
                 (((int)(ps2kb_state.lctrl || ps2kb_state.rctrl)) << 1) +
                 (((int)(ps2kb_state.lshift || ps2kb_state.rshift)) << 2) +
                 (((int)(ps2kb_state.lalt || ps2kb_state.ralt )) << 3) +
                 ((int)state << 7);
-            if (e.flags & KB_FLAG_SHIFT)
+            if (e.flags & KB_FLAG_CONTROL || e.flags & KB_FLAG_ALT)
+            {
+                e.utf8 = 0;
+                e.flags &= KB_FLAG_SPECIAL;
+            }
+            else if (e.flags & KB_FLAG_SHIFT)
             {
                 e.utf8 = (*kb_map)[KS_SHIFT][scancode];
             }
