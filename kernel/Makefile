@@ -1,6 +1,9 @@
-DEFAULT_HOST!=../default-host.sh
-HOST?=DEFAULT_HOST
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+DEFAULT_HOST=$(shell ../default-host.sh)
+HOST?=$(DEFAULT_HOST)
+HOSTARCH=$(shell ../target-triplet-to-arch.sh $(HOST))
+$(info DEFAULT_HOST="$(DEFAULT_HOST)")
+$(info HOST="$(HOST)")
+$(info HOSTARCH="$(HOSTARCH)")
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -9,6 +12,7 @@ LIBS?=
 
 DESTDIR?=
 PREFIX?=/usr/local
+#PREFIX?=/home/tor/opt/cross
 EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
@@ -19,6 +23,7 @@ LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 ARCHDIR=arch/$(HOSTARCH)
+$(info ARCHDIR="$(ARCHDIR)")
 
 include $(ARCHDIR)/make.config
 
@@ -30,6 +35,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
+kernel/log.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \

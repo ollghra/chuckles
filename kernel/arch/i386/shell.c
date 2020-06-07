@@ -5,11 +5,36 @@
 
 int shell_key(struct key_event e)
 {
-  //  if(!(e.flags & 1) && e.down)  printf("%c F:[%c,%c,%c]", e.utf8, (e.flags & (1<<1)) == (1<<1)? 'C':'0', (e.flags & (1<<2)) == (1<<2) ? 'S': '0', (e.flags & (1<<3)) == (1<<3) ? 'A': '0');
-  if(~e.flags & 1 && e.flags & 0x80)
+    if(!(e.flags & KB_FLAG_SPECIAL) && e.flags & KB_FLAG_DOWN)
     {
-      if(e.flags & (1 << 2))
-	e.utf8 -= 0x20;
-      printf("%c", e.utf8);
+        printf("%c", e.utf8);
     }
+    else if (e.flags & KB_FLAG_DOWN){
+        //printf("%c%c%c%c+", e.flags & KB_FLAG_SHIFT ? 's':' ',e.flags & KB_FLAG_CONTROL ? 'c':' ',  e.flags & KB_FLAG_ALT ? 'a':' ', e.flags & KB_FLAG_MOD ? 'm':' ');
+        switch (e.code)
+        {
+            case KEY_UP_ARROW:
+                printf("<UP>");
+                break;
+            case KEY_DOWN_ARROW:
+                printf("<DOWN>");
+                break;
+            case KEY_LEFT_ARROW:
+                printf("<LEFT>");
+                break;
+            case KEY_RIGHT_ARROW:
+                printf("<RIGHT>");
+                break;
+            case KEY_PAGE_UP:
+                printf("<PG UP>");
+                break;
+            case KEY_PAGE_DOWN:
+                printf("<PG DOWN>");
+                break;
+            default:
+                printf("<0x%x>",e.code);
+                break;
+        }
+    }
+    return -1;
 }

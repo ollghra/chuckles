@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <stdio.h>
 
+#include <sys/debug.h>
 #include <sys/io.h>
 #include <arch/i386/ps2.h>
 
@@ -46,7 +46,7 @@ void ps2_write(uint8_t port, uint8_t data)
 
 void ps2_init(void)
 {
-  printf("PS/2 CONTROLLER STILL DOESN'T WORK\n");
+  serial_writes("PS/2 CONTROLLER STILL DOESN'T WORK\n");
   struct{
     uint8_t num_ports;
   } ps2_info;
@@ -64,21 +64,27 @@ void ps2_init(void)
   outb(CMD_PORT, 0x20);
   uint8_t config = ps2_read();
   if(config & (1<<5)) {// If b5 set, PS/2 not 2 channel
-    printf("%d: config byte = %x\n", __LINE__,config);
-    printf("PS/2 single channel\n");
+	serial_writed(__LINE__);
+	serial_writes(": config byte = ");
+	serial_writed(config);
+	serial_writes("\nPS/2 single channel\n");
     ps2_info.num_ports = 1;
   }
   else
     {
       ps2_info.num_ports = 2;
     }
-  printf("/%d: before, config byte = %x\n", __LINE__,config);
+  serial_writed(__LINE__);
+  serial_writes(": before, config byte = ");
+  serial_writed(config);
   config &= 0x3F; // Bits 0,1,6: irqs for 1 and 2, disable translationa
-  printf("\\%d: after , config byte = %x\n", __LINE__,config);
+  serial_writed(__LINE__);
+  serial_writes(": after, config byte = ");
+  serial_writed(config);
   do
     {
       status = inb(STATUS_PORT);
-      printf("poll ");
+      serial_writes("poll ");
     }
   while(status & STATUS_IN_FULL);
   outb(CMD_PORT, 0x60);
@@ -90,13 +96,13 @@ void ps2_init(void)
 #ifndef qemu
   for(status = ps2_read(); status != 0xFA && retries < 1; status = ps2_read(),retries++)
     {
-      printf("\nstatus = %x ", status);
+      serial_printf("\nstatus = %x ", status);
       if(status == 0xFE)
 	{
 	  do
 	    {
 	      status = inb(STATUS_PORT);
-	      printf("poll ");
+	      serial_printf("poll ");
 	    }
 	  while(status & STATUS_IN_FULL);
 	  outb(CMD_PORT, 0x60);
@@ -106,9 +112,13 @@ void ps2_init(void)
 #endif
   */
   outb(CMD_PORT, 0x20);
-  printf("/%d: before, config byte = %x\n", __LINE__,config);
+  serial_writed(__LINE__);
+  serial_writes(": before, config byte = ");
+  serial_writed(config);
   config = ps2_read();
-  printf("\\%d: after,  config byte = %x\n", __LINE__,config);
+  serial_writed(__LINE__);
+  serial_writes(": after, config byte = ");
+  serial_writed(config);
   
   // Controller Self-Test
   outb(CMD_PORT, 0xAA);
@@ -119,19 +129,19 @@ void ps2_init(void)
     }
   if(status != 0x55)
     {
-      printf("PS/2 controller self-test failed with code %x\n", status);
+      serial_printf("PS/2 controller self-test failed with code %x\n", status);
     }
   // 2 Channel test
   if(ps2_info.num_ports == 2)
     {
       ps2_write(2, 0xA8);
-      printf("line: %d\n", __LINE__);
+      //serial_printf("line: %d\n", __LINE__);
       outb(CMD_PORT, 0x20);
       config = ps2_read(); // BLOCKING HERE
-      printf("line: %d\n", __LINE__);
+      //serial_printf("line: %d\n", __LINE__);
       if(config & (1<<5))
 	{
-	  printf("PS/2 single channel confirmed\n");
+	  serial_printf("PS/2 single channel confirmed\n");
 	  ps2_info.num_ports = 1;
 	  outb(CMD_PORT, 0xA7);
 	}
@@ -141,14 +151,14 @@ void ps2_init(void)
   outb(CMD_PORT, 0xAB);
   uint8_t ret_code = ps2_read();
   if(ret_code)
-    printf("PS/2 port 1 test failed with code %x\n", ret_code);
+    serial_printf("PS/2 port 1 test failed with code %x\n", ret_code);
 
   if(ps2_info.num_ports == 2)
     {
       outb(CMD_PORT, 0xA9);
       ret_code = ps2_read();
       if(ret_code)
-	printf("PS/2 port 2 test failed with code %x\n", ret_code);
+	serial_printf("PS/2 port 2 test failed with code %x\n", ret_code);
     }
 
   // Re-enabling IRQs for 1 and 2
@@ -169,81 +179,81 @@ void ps2_init(void)
   retries = 0;
   for(;status != 0xFA && retries < 2;retries++)
     {
-      printf("Responded %x. Retrying...", status);
+      serial_printf("Responded %x. Retrying...", status);
       status = ps2_read();
     }
-  printf("Response to RESET from port 1: %x\n", status);
+  serial_printf("Response to RESET from port 1: %x\n", status);
 
   if(ps2_info.num_ports == 2)
     {
       ps2_write(2, 0xFF);
-      printf("Response to RESET from port 2: %x\n", ps2_read());
+      serial_printf("Response to RESET from port 2: %x\n", ps2_read());
     }
 
-  printf("Detecting device types\n");
+  serial_printf("Detecting device types\n");
   ps2_write(1, 0xF5);
   for(status = ps2_read(); status != 0xFA; status = ps2_read())
-    printf("status: %x ", status);
+    serial_printf("status: %x ", status);
   ps2_write(1, 0xF2);
-  printf("Request acknowleged\n");
+  serial_printf("Request acknowleged\n");
 
   for(status = ps2_read(); status != 0xFA; status = ps2_read())
-    printf("status:%x ", status);
+    serial_printf("status:%x ", status);
   status = ps2_read();
-  printf("Response: %x\n", status);
+  serial_printf("Response: %x\n", status);
   if(status != 0x0 && status != 0xAB)
     {
       status = ps2_read();
-      printf("Status: %x\n", status);
+      serial_printf("Status: %x\n", status);
     }
 
   switch(status)
     {
     case 0:
-      printf("Device is %s\n", devices[0]);
+      serial_printf("Device is %s\n", devices[0]);
       break;
     case 0x3:
-      printf("Device is %s\n", devices[1]);
+      serial_printf("Device is %s\n", devices[1]);
       break;
     case 0x4:
-      printf("Device is %s\n", devices[2]);
+      serial_printf("Device is %s\n", devices[2]);
       break;
     case 0xAB:
       switch(ps2_read())
 	{
 	case 0x41:
 	case 0xC1:
-	  printf("Device is %s\n", devices[3]);
+	  serial_printf("Device is %s\n", devices[3]);
 	  break;
 	case 0x83:
-	  printf("Device is %s\n", devices[4]);
+	  serial_printf("Device is %s\n", devices[4]);
 	  break;
 	}
       break;
     default:
-      printf("Unknown device type %x\n", status);
+      serial_printf("Unknown device type %x\n", status);
       break;
     }
   ps2_write(1, 0xF4);
 
-  printf("Scanning enabled: %x\n", ps2_read());
+  serial_printf("Scanning enabled: %x\n", ps2_read());
 
-  printf("/%d: before, config byte = %x\n", __LINE__,config);
+  serial_printf("/%d: before, config byte = %x\n", __LINE__,config);
   config &= 0x35; 
-  printf("\\%d: after , config byte = %x\n", __LINE__,config);
+  serial_printf("\\%d: after , config byte = %x\n", __LINE__,config);
   do
     {
       status = inb(STATUS_PORT);
-      printf("poll ");
+      serial_printf("poll ");
     }
   while(status & STATUS_IN_FULL);
   outb(CMD_PORT, 0x60);
   ps2_write(1, config);
 
   outb(CMD_PORT, 0x20);
-  printf("/%d: before, config byte = %x\n", __LINE__,config);
+  serial_printf("/%d: before, config byte = %x\n", __LINE__,config);
   config = ps2_read();
-  printf("\\%d: after,  config byte = %x\n", __LINE__,config);
+  serial_printf("\\%d: after,  config byte = %x\n", __LINE__,config);
   
 }
 
@@ -253,10 +263,10 @@ outb(CMD_PORT, 0x60);
   ps2_write(1, config);
 
   outb(CMD_PORT, 0x20);
-  printf("/%d: before, config byte = %x\n", __LINE__,config);
+  serial_printf("/%d: before, config byte = %x\n", __LINE__,config);
   config = ps2_read();
-  printf("\\%d: after,  config byte = %x\n", __LINE__,config);
+  serial_printf("\\%d: after,  config byte = %x\n", __LINE__,config);
   config = ps2_read();
-  printf("\\%d: after,  config byte = %x\n", __LINE__,config);
+  serial_printf("\\%d: after,  config byte = %x\n", __LINE__,config);
   
  */

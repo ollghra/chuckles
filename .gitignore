@@ -1,5 +1,10 @@
+*.o
 *.iso
 isodir
 sysroot
 *.log
 *~
+*.bin
+
+# BOCHSOUT
+bochsout.txt
