@@ -4,7 +4,6 @@
 #include <kernel/tty.h>
 #include <kernel/log.h>
 
-#include <arch/i386/paging.h>
 #include <arch/i386/gdt.h>
 #include <arch/i386/idt.h>
 #include <arch/i386/isr.h>
@@ -28,9 +27,13 @@ void current_test(void);
 
 void kernel_early(void)
 {
+	uint32_t esp;
+	asm("movl %%esp, %0\n" : "=r" (esp));
 	serial_initialise();
 	serial_writes(__DATE__ "\t" __TIME__ "\n");
+	serial_writed(esp);
 	gdt_initialise();
+	serial_writed(__LINE__);
 	terminal_initialise();
 	idt_init();
 	isrs_install();
@@ -39,6 +42,8 @@ void kernel_early(void)
 	ps2_init();
 	ps2kb_init();
 	__asm__ __volatile__ ("sti");
+
+  serial_writes("\nKERNEL_EARLY FINISHED\n");
 }
 
 void kernel_main(unsigned int ebx)
@@ -60,27 +65,4 @@ void kernel_end()
 
 void current_test(void)
 {
-	/*multiboot_info_t *mbinfo = (multiboot_info_t *) ebx;
-	unsigned int address_of_module = mbinfo->mods_addr;
-	printf("ebx: %x\nmodule address: %x\nflags: %x\nmods_count: %x\n", ebx, address_of_module, mbinfo->flags, mbinfo->mods_count);
-	typedef void (*call_module_t)(void);
-	call_module_t start_program = (call_module_t) address_of_module;
-	//start_program();
-	*/
-	//debug_shell();
-	/*
-	   printf("kernel start = %x\n", &kernel_start_marker);
-	   printf("kernel end Magic! = %x\n", kernel_end_marker);
-	   printf("kernel end   = %x\n", (int)&kernel_end_marker);
-	   printf("kernel size  = %d B, %d kB\n", &kernel_end_marker - &kernel_start_marker, (&kernel_end_marker - &kernel_start_marker)/1024);
-	   printf("CPUID: %s\n", cpu_string());
-	   */
-	// init_paging();
-	// printf("JKIBJONJ\n");
-
-	/*
-	 * Old tests:
-	 printf("%d", 1/0);
-	 timer_wait(300);printf("Timer Finished");
-	 */
 }
