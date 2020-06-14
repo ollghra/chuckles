@@ -74,29 +74,20 @@ void current_test(multiboot_info_t* mbi)
     if (mbi->flags & (1<<6))
     {
         int nmmaps = mbi->mmap_length/((memory_map_t*)mbi->mmap_addr)->size;
-        printf("MMAPS FOUND: %d\n", nmmaps);
         memory_map_t* usable_mmaps[nmmaps];
         int n_usable_mmaps = 0;
-        int i = 0;
         for (memory_map_t* mm = (memory_map_t*)mbi->mmap_addr
                 ; mm < (memory_map_t*)(mbi->mmap_addr + mbi->mmap_length)
                 ; mm=(memory_map_t*)((unsigned int) mm + mm->size + sizeof(mm->size)))
         { 
-            printf("MMAP %d: <S:%x,BASE:% .8lx,LEN:% .8lx,T:%d>\n", i
-                    , mm->size
-                    , mm->base_addr_low + (mm->base_addr_high << sizeof(unsigned int))
-                    , mm->length_low + (mm->length_high << sizeof(unsigned int))
-                    , mm->type);
             if(1 == mm->type)
             {
                 usable_mmaps[n_usable_mmaps++] = mm;
             }
-            i++;
         }
         printf("%d usable mmaps\n", n_usable_mmaps);
         for (int i = 0; i < n_usable_mmaps; i++)
         {
-            // TODO: put this in a log2 function
             unsigned int B = usable_mmaps[i]->length_low + (usable_mmaps[i]->length_high<<sizeof(uint32_t));
             printf("Usable PMEM from %.8lx to %.8lx (%d kiB, %d MiB)\n"
                     , usable_mmaps[i]->base_addr_low + (usable_mmaps[i]->base_addr_high<<sizeof(uint32_t))

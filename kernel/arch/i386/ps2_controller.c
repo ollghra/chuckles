@@ -64,6 +64,7 @@ void ps2_init(void)
   outb(CMD_PORT, 0x20);
   uint8_t config = ps2_read();
   if(config & (1<<5)) {// If b5 set, PS/2 not 2 channel
+    serial_writes("ps2_controller: ");
 	serial_writed(__LINE__);
 	serial_writes(": config byte = ");
 	serial_writed(config);
@@ -74,10 +75,12 @@ void ps2_init(void)
     {
       ps2_info.num_ports = 2;
     }
+  serial_writes("ps2_controller: ");
   serial_writed(__LINE__);
   serial_writes(": before, config byte = ");
   serial_writed(config);
   config &= 0x3F; // Bits 0,1,6: irqs for 1 and 2, disable translationa
+  serial_writes("ps2_controller: ");
   serial_writed(__LINE__);
   serial_writes(": after, config byte = ");
   serial_writed(config);
@@ -112,10 +115,12 @@ void ps2_init(void)
 #endif
   */
   outb(CMD_PORT, 0x20);
+  serial_writes("ps2_controller: ");
   serial_writed(__LINE__);
   serial_writes(": before, config byte = ");
   serial_writed(config);
   config = ps2_read();
+  serial_writes("ps2_controller: ");
   serial_writed(__LINE__);
   serial_writes(": after, config byte = ");
   serial_writed(config);
