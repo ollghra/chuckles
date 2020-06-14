@@ -1,0 +1,6 @@
+#ifndef _FLOAT_H
+#define _FLOAT_H 1
+
+#define DBL_MAX ((double)1.79769313486231570814527423731704357e+308L)
+
+#endif
