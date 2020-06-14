@@ -27,10 +27,11 @@ stack_top:
 _start:
 	movl $stack_top, %esp
 
+    # mbi struct address
+	push %ebx
 	# Call the global constructors.
 	call _init
 
-	push %ebx
 	# Transfer control to the main kernel.
 	call kernel_main
 
