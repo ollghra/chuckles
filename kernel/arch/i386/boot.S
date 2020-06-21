@@ -34,9 +34,8 @@ boot_page_table1:
 _start:
     # Physical address of boot_page_table1
     movl $(boot_page_table1 - 0xC0000000), %edi
-    # First address to map is 0
+    # Map from 0 to 4 MiB
     movl $0, %esi
-    # map 1023 pages, with 1024th being the VGA text buffer
     movl $1023, %ecx
 
 1:
@@ -62,7 +61,7 @@ _start:
 
 3:
     # Map VGA video memory to 0xC03FF000 as present and writeable
-    movl $(0x000B8000 | 0x003), boot_page_table1 - 0xC0000000 + 1023*4
+    #movl $(0x000B8000 | 0x003), boot_page_table1 - 0xC0000000 + 1023*4
 
 
     movl $(boot_page_table1 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 0
