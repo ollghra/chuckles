@@ -56,33 +56,13 @@ _start:
     # Next page table entry
     addl $4, %edi
     loop 1b
-
-2:  # Finished populating 0-4MiB range, 
-    # Now map final PTE in final PDE to the PD itself
-    movl $(boot_page_table1024 - 0xC0000000), %edi
-    movl $0xFFC00000, %esi
-    movl $1023, %ecx
-5:  # All PTEs but final not present
-    cmpl $0xFFFFF000, %esi
-    jge 6f
-    movl %esi, %edx
-    andl $0xFFFFFFFE, %edx  # Mark as not present
-    movl %edx, (%edi)
-    
-    addl $0x1000, %esi
-    addl $4, %edi
-    loop 5b
-6:  # Having marked all previous pages as not present, now add entry pointing to page directory
-    mov $(boot_page_directory - 0xC0000000), %edx
-    orl $0x003, %edx
-    movl %edx, (%edi)
     
 3:  # Finished populating paging structures, now enable paging
     # Identity and higher half mappings
     movl $(boot_page_table1 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 0
     movl $(boot_page_table1 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 768 * 4
     # PD mapping
-    #movl $(boot_page_table1024 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 1023 * 4
+    movl $(boot_page_directory - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 1023 * 4
 
     # page directory's address goes in cr3
     movl $(boot_page_directory - 0xC0000000), %ecx

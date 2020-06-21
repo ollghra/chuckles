@@ -68,15 +68,15 @@ void * physical(void * virtual)
     uint32_t pdidx = (uint32_t) virtual >> 22;
     uint32_t ptidx = (uint32_t) virtual >> 12 & 0x3FF;
     uint32_t * pd = (uint32_t *) 0xFFFFF000; // Stored as last PDE
-    if (!(*pd & 0x01))
+    if (!(*(pd + pdidx)& 0x01))
     {
-        kerror("Page directory location not findable.\n");
+        printf("PDE %d not present.\n",pdidx);
         return (void *)0;
     }
     uint32_t * pt = ((uint32_t*) 0xFFC00000) + (0x400 * pdidx);
     if (!(*pt & 0x01))
     {
-        kerror("Page table location not findable.\n");
+        kerror("Page table not present.\n");
         return (void *)0;
     }
     return (void *)((pt[ptidx] & ~0xFFF) + ((uint32_t)virtual & 0xFFF));
@@ -90,6 +90,7 @@ void * virtual_kaddr(void * physical)
 void current_test(multiboot_info_t* mbi)
 {
     multiboot_info_t * vmbi = (multiboot_info_t*) virtual_kaddr(mbi);
+    printf("PHYS(%X) = %X (should be %X)\n", vmbi, physical(vmbi), mbi);
     mbi = vmbi;
     if (mbi->flags & 1)
     {
@@ -99,11 +100,11 @@ void current_test(multiboot_info_t* mbi)
     }
     if (mbi->flags & (1<<6))
     {
-        int nmmaps = mbi->mmap_length/((memory_map_t*)virtual_kaddr(mbi->mmap_addr))->size;
+        int nmmaps = mbi->mmap_length/((memory_map_t*)virtual_kaddr((void*)mbi->mmap_addr))->size;
         memory_map_t* usable_mmaps[nmmaps];
         int n_usable_mmaps = 0;
-        for (memory_map_t* mm = (memory_map_t*)virtual_kaddr(mbi->mmap_addr)
-                ; mm < (memory_map_t*)virtual_kaddr(mbi->mmap_addr + mbi->mmap_length)
+        for (memory_map_t* mm = (memory_map_t*)virtual_kaddr((void*)mbi->mmap_addr)
+                ; mm < (memory_map_t*)virtual_kaddr((void*)(mbi->mmap_addr + mbi->mmap_length))
                 ; mm=(memory_map_t*)((unsigned int) mm + mm->size + sizeof(mm->size)))
         { 
             if(1 == mm->type)
@@ -112,6 +113,10 @@ void current_test(multiboot_info_t* mbi)
             }
         }
         printf("%d usable mmaps\n", n_usable_mmaps);
+        printf("PHYS(%X) = %X (should be %X)\n"
+                , virtual_kaddr((void*)mbi->mmap_addr)
+                , physical(virtual_kaddr((void*)mbi->mmap_addr))
+                , mbi->mmap_addr);
         for (int i = 0; i < n_usable_mmaps; i++)
         {
             unsigned int B = usable_mmaps[i]->length_low + (usable_mmaps[i]->length_high<<sizeof(uint32_t));
