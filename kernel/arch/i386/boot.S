@@ -26,7 +26,6 @@ boot_page_directory:
     .skip 4096
 boot_page_table1:
     .skip 4096
-# If kernel grows greater than 3MiB, allocate more tables
 
 # The kernel entry point.
 .section .text
@@ -42,7 +41,9 @@ _start:
 
 1:
     # Map kernel only
-    cmpl $(kernel_start_marker - 0xC0000000), %esi
+    # cmpl $(kernel_start_marker - 0xC0000000), %esi
+    # Map all from 0x0 to the end of the kernel
+    cmpl 0, %esi
     jl 2f
     cmpl $(kernel_end_marker - 0xC0000000), %esi
     jge 3f

@@ -9,7 +9,7 @@
 #include <arch/i386/isr.h>
 #include <arch/i386/irq.h>
 #include <arch/i386/timer.h>
-#include <arch/i386/paging.h>
+//#include <arch/i386/paging.h>
 #include <arch/i386/ps2.h>
 #include <arch/i386/ps2kb.h>
 
@@ -42,7 +42,7 @@ void kernel_early(void)
     timer_install();
     ps2_init();
     ps2kb_init();
-    paging_init();
+    //paging_init();
     __asm__ __volatile__ ("sti");
     serial_writes("\nKERNEL_EARLY FINISHED\n");
 
@@ -63,21 +63,44 @@ void kernel_end()
     for(;;);
 }
 
+void * physical(void * virtual)
+{
+    uint32_t pdidx = (uint32_t) virtual >> 22;
+    uint32_t ptidx = (uint32_t) virtual >> 12 & 0x3FF;
+    uint32_t * pd = (uint32_t *) 0xFFFFF000; // Stored as last PDE
+    if (!(*pd & 0x01))
+    {
+        kerror("Page directory location not findable.\n");
+        return (void *)0;
+    }
+    uint32_t * pt = ((uint32_t*) 0xFFC00000) + (0x400 * pdidx);
+    if (!(*pt & 0x01))
+    {
+        kerror("Page table location not findable.\n");
+        return (void *)0;
+    }
+    return (void *)((pt[ptidx] & ~0xFFF) + ((uint32_t)virtual & 0xFFF));
+}
+
 void current_test(multiboot_info_t* mbi)
 {
+    printf("MBI @ %X\n", mbi);
+    multiboot_info_t * vmbi = (multiboot_info_t*)(0xC0000000 + (uint32_t)mbi);
+    printf("MBI @ v%X\n", vmbi);
+    mbi = vmbi;
     if (mbi->flags & 1)
     {
-        printf("MEM LOWER %dKiB (<1MiB) (max 640 kiB);", mbi->mem_lower);
-        printf("MEM UPPER %dKiB (>1MiB)", mbi->mem_upper);
+        printf("MEM LOWER %dKiB (<1MiB)|", mbi->mem_lower);
+        printf("MEM UPPER %dMiB (>1MiB)", mbi->mem_upper / (1<<10));
         printf("\n");
     }
     if (mbi->flags & (1<<6))
     {
-        int nmmaps = mbi->mmap_length/((memory_map_t*)mbi->mmap_addr)->size;
+        int nmmaps = mbi->mmap_length/((memory_map_t*)(mbi->mmap_addr+ 0xC0000000))->size;
         memory_map_t* usable_mmaps[nmmaps];
         int n_usable_mmaps = 0;
-        for (memory_map_t* mm = (memory_map_t*)mbi->mmap_addr
-                ; mm < (memory_map_t*)(mbi->mmap_addr + mbi->mmap_length)
+        for (memory_map_t* mm = (memory_map_t*)(mbi->mmap_addr+ 0xC0000000)
+                ; mm < (memory_map_t*)(mbi->mmap_addr + mbi->mmap_length + 0xC0000000)
                 ; mm=(memory_map_t*)((unsigned int) mm + mm->size + sizeof(mm->size)))
         { 
             if(1 == mm->type)

@@ -129,9 +129,20 @@ void fault_handler(struct regs *r)
 	{
 		switch(r->int_no)
 		{
-			// Don't deal with this yet
-			//			case 14:
-			//				page_fault(r);
+            case 14:
+                printf("Page fault: ");
+                uint32_t cr2,err_code;
+                asm ("movl %%cr2, %0\n\
+                      pop %1"
+                        : "=r" (cr2), "=r" (err_code)
+                    );
+                printf("[cr2:%X,eip:%X,code:%c%c%c(%b)]\n", cr2, r->eip
+                        , err_code & 4 ? 'U' : 'S'
+                        , err_code & 2 ? 'W' : 'S'
+                        , err_code & 1 ? 'P' : 'p'
+                        , err_code & 7 
+                        );
+                break;
 			default:
 				printf("\n%s Exception. System Halted\n",
 						exception_messages[r->int_no]);
