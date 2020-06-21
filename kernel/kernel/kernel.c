@@ -82,11 +82,14 @@ void * physical(void * virtual)
     return (void *)((pt[ptidx] & ~0xFFF) + ((uint32_t)virtual & 0xFFF));
 }
 
+void * virtual_kaddr(void * physical)
+{
+    return (void *) (0xC0000000 + (uint32_t) physical);
+}
+
 void current_test(multiboot_info_t* mbi)
 {
-    printf("MBI @ %X\n", mbi);
-    multiboot_info_t * vmbi = (multiboot_info_t*)(0xC0000000 + (uint32_t)mbi);
-    printf("MBI @ v%X\n", vmbi);
+    multiboot_info_t * vmbi = (multiboot_info_t*) virtual_kaddr(mbi);
     mbi = vmbi;
     if (mbi->flags & 1)
     {
@@ -96,11 +99,11 @@ void current_test(multiboot_info_t* mbi)
     }
     if (mbi->flags & (1<<6))
     {
-        int nmmaps = mbi->mmap_length/((memory_map_t*)(mbi->mmap_addr+ 0xC0000000))->size;
+        int nmmaps = mbi->mmap_length/((memory_map_t*)virtual_kaddr(mbi->mmap_addr))->size;
         memory_map_t* usable_mmaps[nmmaps];
         int n_usable_mmaps = 0;
-        for (memory_map_t* mm = (memory_map_t*)(mbi->mmap_addr+ 0xC0000000)
-                ; mm < (memory_map_t*)(mbi->mmap_addr + mbi->mmap_length + 0xC0000000)
+        for (memory_map_t* mm = (memory_map_t*)virtual_kaddr(mbi->mmap_addr)
+                ; mm < (memory_map_t*)virtual_kaddr(mbi->mmap_addr + mbi->mmap_length)
                 ; mm=(memory_map_t*)((unsigned int) mm + mm->size + sizeof(mm->size)))
         { 
             if(1 == mm->type)

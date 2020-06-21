@@ -8,3 +8,4 @@ sysroot
 
 # BOCHSOUT
 bochsout.txt
+*.fs

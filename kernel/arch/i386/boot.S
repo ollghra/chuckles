@@ -26,46 +26,63 @@ boot_page_directory:
     .skip 4096
 boot_page_table1:
     .skip 4096
+boot_page_table1024:
+    .skip 4096
 
 # The kernel entry point.
 .section .text
 .global _start
 .type _start, @function
 _start:
+
+## First, set up paging
     # Physical address of boot_page_table1
     movl $(boot_page_table1 - 0xC0000000), %edi
     # Map from 0 to 4 MiB
     movl $0, %esi
-    movl $1023, %ecx
+    movl $1024, %ecx
 
-1:
-    # Map kernel only
-    # cmpl $(kernel_start_marker - 0xC0000000), %esi
-    # Map all from 0x0 to the end of the kernel
-    cmpl 0, %esi
-    jl 2f
+1:  # Map all from 0x0 to the end of the kernel
     cmpl $(kernel_end_marker - 0xC0000000), %esi
     jge 3f
     # Map physical address as present and writeable
-    # .text and .rodata should not be writeable, change this
+    # TODO .text and .rodata should not be writeable, change this
     movl %esi, %edx
     orl $0x003, %edx
     movl %edx, (%edi)
 
-2:
     # Next page
     addl $4096, %esi
     # Next page table entry
     addl $4, %edi
     loop 1b
 
-3:
-    # Map VGA video memory to 0xC03FF000 as present and writeable
-    #movl $(0x000B8000 | 0x003), boot_page_table1 - 0xC0000000 + 1023*4
-
-
+2:  # Finished populating 0-4MiB range, 
+    # Now map final PTE in final PDE to the PD itself
+    movl $(boot_page_table1024 - 0xC0000000), %edi
+    movl $0xFFC00000, %esi
+    movl $1023, %ecx
+5:  # All PTEs but final not present
+    cmpl $0xFFFFF000, %esi
+    jge 6f
+    movl %esi, %edx
+    andl $0xFFFFFFFE, %edx  # Mark as not present
+    movl %edx, (%edi)
+    
+    addl $0x1000, %esi
+    addl $4, %edi
+    loop 5b
+6:  # Having marked all previous pages as not present, now add entry pointing to page directory
+    mov $(boot_page_directory - 0xC0000000), %edx
+    orl $0x003, %edx
+    movl %edx, (%edi)
+    
+3:  # Finished populating paging structures, now enable paging
+    # Identity and higher half mappings
     movl $(boot_page_table1 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 0
     movl $(boot_page_table1 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 768 * 4
+    # PD mapping
+    #movl $(boot_page_table1024 - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 1023 * 4
 
     # page directory's address goes in cr3
     movl $(boot_page_directory - 0xC0000000), %ecx
@@ -80,8 +97,7 @@ _start:
     lea 4f, %ecx
     jmp *%ecx
 
-4:
-    # Paging now fully set up and enabled
+4:  # Paging now fully set up and enabled
     # Unmap identity mapping (now unnecessary)
     movl $0, boot_page_directory + 0
     
