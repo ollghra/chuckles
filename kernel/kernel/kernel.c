@@ -18,6 +18,7 @@
 #include <sys/debug.h>
 #include <sys/kb.h>
 #include <sys/shell.h>
+#include <sys/memory.h>
 #include <sys/multiboot.h>
 
 extern unsigned long kernel_end_marker;
@@ -53,6 +54,8 @@ void kernel_main(multiboot_info_t* mbi)
     kernel_early();
     printf("Kernel start: 0x%x, kernel end: 0x%x\n",
             &kernel_start_marker, &kernel_end_marker);
+    printf("Kernel start: p0x%X, kernel end: p0x%X\n",
+            physical(&kernel_start_marker), physical(&kernel_end_marker));
 
     current_test(mbi);
     kernel_end();
@@ -63,34 +66,9 @@ void kernel_end()
     for(;;);
 }
 
-void * physical(void * virtual)
-{
-    uint32_t pdidx = (uint32_t) virtual >> 22;
-    uint32_t ptidx = (uint32_t) virtual >> 12 & 0x3FF;
-    uint32_t * pd = (uint32_t *) 0xFFFFF000; // Stored as last PDE
-    if (!(*(pd + pdidx)& 0x01))
-    {
-        printf("PDE %d not present.\n",pdidx);
-        return (void *)0;
-    }
-    uint32_t * pt = ((uint32_t*) 0xFFC00000) + (0x400 * pdidx);
-    if (!(*pt & 0x01))
-    {
-        kerror("Page table not present.\n");
-        return (void *)0;
-    }
-    return (void *)((pt[ptidx] & ~0xFFF) + ((uint32_t)virtual & 0xFFF));
-}
-
-void * virtual_kaddr(void * physical)
-{
-    return (void *) (0xC0000000 + (uint32_t) physical);
-}
-
 void current_test(multiboot_info_t* mbi)
 {
     multiboot_info_t * vmbi = (multiboot_info_t*) virtual_kaddr(mbi);
-    printf("PHYS(%X) = %X (should be %X)\n", vmbi, physical(vmbi), mbi);
     mbi = vmbi;
     if (mbi->flags & 1)
     {
@@ -113,14 +91,10 @@ void current_test(multiboot_info_t* mbi)
             }
         }
         printf("%d usable mmaps\n", n_usable_mmaps);
-        printf("PHYS(%X) = %X (should be %X)\n"
-                , virtual_kaddr((void*)mbi->mmap_addr)
-                , physical(virtual_kaddr((void*)mbi->mmap_addr))
-                , mbi->mmap_addr);
         for (int i = 0; i < n_usable_mmaps; i++)
         {
             unsigned int B = usable_mmaps[i]->length_low + (usable_mmaps[i]->length_high<<sizeof(uint32_t));
-            printf("Usable PMEM from %.8lx to %.8lx (%d kiB, %d MiB)\n"
+            printf("Usable memory from p%.8lx to p%.8lx (%d kiB, %d MiB)\n"
                     , usable_mmaps[i]->base_addr_low + (usable_mmaps[i]->base_addr_high<<sizeof(uint32_t))
                     , B + usable_mmaps[i]->base_addr_low + (usable_mmaps[i]->base_addr_high<<sizeof(uint32_t))
                     , B / (2<<(10-1)), B / (2<<(20-1))

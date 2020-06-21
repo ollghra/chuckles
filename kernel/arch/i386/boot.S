@@ -44,7 +44,7 @@ _start:
 
 1:  # Map all from 0x0 to the end of the kernel
     cmpl $(kernel_end_marker - 0xC0000000), %esi
-    jge 3f
+    jg 3f
     # Map physical address as present and writeable
     # TODO .text and .rodata should not be writeable, change this
     movl %esi, %edx

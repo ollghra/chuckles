@@ -44,6 +44,7 @@ string/strdup.o \
 string/strcpy.o \
 sys/debug.o \
 sys/cpu_string.o \
+sys/memory.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \
