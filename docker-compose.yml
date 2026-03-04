@@ -1,19 +1,12 @@
 services:
   env:
     build:
-      args:
-        HOST_UID: "${HOST_UID}"
-        HOST_GID: "${HOST_GID}"
-        WHO: "${WHO}"
-        binutils_version: "${binutils_version}"
-        gcc_version: "${gcc_version}"
       context: "."
       dockerfile: "env/Dockerfile"
+    environment: 
+      HOST_OSTYPE: ${OSTYPE}
     volumes:
-      - './env/cross:/cross'
-      - '..:/chuckles'
-    # environment:
+      - '.:/chuckles'
     working_dir: /chuckles
-
-
-# cpuset: 8
+    stdin_open: true
+    tty: true

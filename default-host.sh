@@ -1,2 +1,2 @@
 #!/bin/sh
-echo i686-pc-elf
+echo i686-elf

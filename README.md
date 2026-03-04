@@ -5,6 +5,11 @@
 |0000000| |0--0|  \0  0/  |0--  x  |00// |0--0|   0|0   0|0 |0-- |0\\0 |0    |0--  | |
 |00| |00| |0  0|   \00/   |000  x  |00   |0  0|   0|0   0|0 |000 |0 \0  \00| |000  O |
 ````
+# TODO:
+- translate grub mmap types to readable names
+- implement output history and scrolling with up and down
+  - status bar at bottom showing current line and column number
+
 ## Design Considerations
 ### [Error Codes](https://www.gnu.org/fun/jokes/errno.2.html)
 ### [Haiku Messages](https://www.gnu.org/fun/jokes/error-haiku.html)
