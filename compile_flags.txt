@@ -1,0 +1,9 @@
+-I
+./libc/include
+-I
+./kernel/include
+-isystem=./libc/include
+--sysroot=./libc/include
+--sysroot=./kernel/include
+-isysroot=./libc/include
+-isysroot=./kernel/include
